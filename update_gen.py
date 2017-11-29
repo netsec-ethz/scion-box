@@ -24,6 +24,7 @@ import os
 import requests
 from shutil import rmtree
 from subprocess import call
+import yaml
 
 
 # SCION
@@ -256,11 +257,12 @@ def _get_masterkey(conf_file):
     :param filestream conf_file: configuration file as a filestream
     :returns: Master key as a string
     """
-    lines = conf_file.readlines()
-    for line in lines:
-        if 'MasterASKey' in line:
-            return line[13:-1]
-    print("[ERROR] Unable to load the AS master key")
+    try:
+        as_conf = yaml.load(conf_file)
+        key = as_conf['MasterASKey']
+        return key
+    except:
+        print("[ERROR] Unable to load the AS master key")
     exit(1)
 
 
