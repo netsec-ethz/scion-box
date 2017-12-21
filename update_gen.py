@@ -285,7 +285,7 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
         as_port = req['UserPort']
         br_id = req['APBRID']
         br_name = _br_name_from_br_id(br_id, my_asid)
-        if_id = 1 # Always use interface 1
+        if_id = br_id # Always use the BR ID as IF ID
         success = False
 
         if req_type == REMOVE:
@@ -301,14 +301,14 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
 
             if success:
                 if current_br == br_name:
-                    tp = _update_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp)
+                    tp = _update_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 else:
                     tp = _remove_topology(current_br, tp)
-                    tp = _create_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp)
+                    tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 if is_vpn:
                     _configure_vpn_ip(user, as_ip)
         else:
-            tp = _create_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp)
+            tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
             success = True
             if is_vpn:
                 _configure_vpn_ip(user, as_ip)
@@ -381,10 +381,11 @@ def _remove_topology(br, tp):
     return tp
 
 
-def _update_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp):
+def _update_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp):
     """
     Update a border router information from the topology
     :param str br_name: name of the border router
+    :param int if_id: interface ID
     :param str as_id: remote AS ID
     :param str as_ip: the IP address of the remote AS
     :param int as_port: the port number of the remote AS
@@ -393,7 +394,6 @@ def _update_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp):
     :param dict tp: target AS topology
     :returns: updated topology as dict
     """
-    if_id = 1 # Always use interface 1
     tp['BorderRouters'][br_name]['Interfaces'][if_id]['ISD_AS'] = as_id
     tp['BorderRouters'][br_name]['Interfaces'][if_id]['Remote']['Addr'] = as_ip
     tp['BorderRouters'][br_name]['Interfaces'][if_id]['Remote']['L4Port'] = as_port
@@ -402,10 +402,11 @@ def _update_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp):
     return tp
 
 
-def _create_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp):
+def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp):
     """
     Create and insert border router information in the topology
     :param str br_name: name of the border router
+    :param int if_id: interface ID
     :param str as_id: remote AS ID
     :param str as_ip: the IP address of the remote AS
     :param int as_port: the port number of the remote AS
@@ -432,7 +433,7 @@ def _create_topology(br_name, as_id, as_ip, as_port, ap_port, is_vpn, tp):
         ],
         'Interfaces': {
         # Always use interface 1
-            1: {
+            if_id: {
                 "Overlay": "UDP/IPv4",
                 "Bandwidth": bandwidth,
                 "Remote": {
@@ -515,6 +516,8 @@ def _restart_scion():
 
 
 def main():
+    if not os.path.exists(OPENVPN_CCD):
+        os.makedirs(OPENVPN_CCD)
     update_local_gen()
 
 
