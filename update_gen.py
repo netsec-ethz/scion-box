@@ -39,8 +39,8 @@ from topology.generator import (
     TopoID,
 )
 
-# SCION-WEB
-from ad_manager.util.local_config_util import (
+# SCION-Utilities
+from local_config_util import (
     ASCredential,
     generate_prom_config,
     gererate_sciond_config,
