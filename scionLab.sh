@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # This file is located in $SCIONPATH and called periodically by cron or systemd
 
-export PYTHONPATH=python/:sub/web/:.
+export PYTHONPATH=../scion/python/:sub/util/:.
 
-python3 python/topology/update_gen.py
+python3 ./update_gen.py
