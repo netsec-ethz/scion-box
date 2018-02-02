@@ -66,8 +66,10 @@ ACC_PW = ""
 #: Client configuration directory for openvpn
 OPENVPN_CCD = os.path.expanduser("~/openvpn_ccd")
 #: Different IP addresses
-INTL_ADDR = ""
+# IP address used by remote border routers for connections (default: public IP address)
 INTF_ADDR = ""
+# Internal address the border routers should bind to (default: same as INTF_ADDR)
+INTL_ADDR = INTF_ADDR
 VPN_ADDR = "10.0.8.1"
 VPN_NETMASK = "255.255.255.0"
 #: URL of SCION Coordination Service
@@ -290,16 +292,14 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
 
         if req_type == REMOVE:
             current_br = _get_br_from_as(as_id, tp['BorderRouters'])
-            success = current_br is not None and current_br == br_name
-            if success:
+            if current_br and current_br == br_name:
                 tp = _remove_topology(br_name, tp)
                 if is_vpn:
                     _remove_vpn_ip(user)
+                success = True
         elif req_type == UPDATE:
             current_br = _get_br_from_as(as_id, tp['BorderRouters'])
-            success = current_br is not None
-
-            if success:
+            if current_br is not None:
                 if current_br == br_name:
                     tp = _update_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 else:
@@ -307,11 +307,12 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
                     tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 if is_vpn:
                     _configure_vpn_ip(user, as_ip)
+                success = True
         else:
             tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
-            success = True
             if is_vpn:
                 _configure_vpn_ip(user, as_ip)
+            success = True
 
         if success:
             res_list.append(as_id)
@@ -518,6 +519,9 @@ def _restart_scion():
 def main():
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
+    if INTF_ADDR == "":
+        print(Error: INTF_ADDR is not defined)
+        return
     update_local_gen()
 
 
