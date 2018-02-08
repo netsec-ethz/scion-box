@@ -66,16 +66,19 @@ ACC_PW = ""
 #: Client configuration directory for openvpn
 OPENVPN_CCD = os.path.expanduser("~/openvpn_ccd")
 #: Different IP addresses
-INTL_ADDR = ""
+# IP address used by remote border routers for connections (default: public IP address)
 INTF_ADDR = ""
+# Internal address the border routers should bind to (default: same as INTF_ADDR)
+INTL_ADDR = INTF_ADDR
 VPN_ADDR = "10.0.8.1"
 VPN_NETMASK = "255.255.255.0"
-#: Port of the AP
-EXTERNAL_PORT = 50000
 #: URL of SCION Coordination Service
 SCION_COORD_URL = "https://coord.scionproto.net/"
+#: Default MTU and bandwidth
+MTU = 1472
+BANDWIDTH = 1000
 
-#: Default key set for new SCIONLabVM join requests
+#: Default key set for new SCIONLabAS join requests
 REMOVE = 'Remove'
 UPDATE = 'Update'
 CREATE = 'Create'
@@ -83,8 +86,9 @@ CREATE = 'Create'
 REMOVED = 'Removed'
 UPDATED = 'Updated'
 CREATED = 'Created'
-#: Default SCION Prometheus port offset
-PROM_PORT_OFFSET = 100
+#: API calls at the coordinator
+GET_REQ = SCION_COORD_URL + "api/as/getUpdatesForAP"
+POST_REQ = SCION_COORD_URL + "api/as/confirmUpdatesFromAP"
 
 # Template for new_as_dict
 # new_as_dict = {
@@ -93,10 +97,11 @@ PROM_PORT_OFFSET = 100
 #             {
 #                 'ASID': '1-4001',
 #                 'IsVPN': true,
-#                 'VMIP': '10.8.0.42',
-#                 'RemoteIAPort': 50050,
-#                 'UserEmail': 'jonghoonkwon@gmail.com',
-#                 'RemoteBR': 'br1-13-2'
+#                 'UserEmail': 'user@example.com',
+#                 'IP': '10.8.0.42',
+#                 'UserPort': 50000,
+#                 'APPort': 50050,
+#                 'APBRID': 2
 #             },
 #         ],
 #         'Update': [],
@@ -110,7 +115,7 @@ def update_local_gen():
     The main function that updates the topology configurations
     """
     is_modified = False
-    updated_vmip = {}
+    updated_ases = {}
     original_topo = []
     isdas_list = _get_my_asid()
     new_as_dict, err = request_server(isdas_list)
@@ -124,22 +129,22 @@ def update_local_gen():
         as_obj, tp = load_topology(my_asid)
         original_topo.append((my_asid, as_obj, tp))
         new_tp = copy.deepcopy(tp)
-        updated_vmip[my_asid] = {}
-        updated_vmip[my_asid][CREATED] = []
-        updated_vmip[my_asid][UPDATED] = []
-        updated_vmip[my_asid][REMOVED] = []
-        for req_type, vmip_list in (
-            (REMOVE, updated_vmip[my_asid][REMOVED]),
-            (UPDATE, updated_vmip[my_asid][UPDATED]),
-            (CREATE, updated_vmip[my_asid][CREATED]),
+        updated_ases[my_asid] = {}
+        updated_ases[my_asid][CREATED] = []
+        updated_ases[my_asid][UPDATED] = []
+        updated_ases[my_asid][REMOVED] = []
+        for req_type, ip_list in (
+            (REMOVE, updated_ases[my_asid][REMOVED]),
+            (UPDATE, updated_ases[my_asid][UPDATED]),
+            (CREATE, updated_ases[my_asid][CREATED]),
         ):
             if new_reqs[req_type]:
-                new_tp = update_topology(my_asid, new_reqs, req_type, vmip_list, new_tp)
+                new_tp = update_topology(my_asid, new_reqs, req_type, ip_list, new_tp)
                 is_modified = True
     if is_modified:
         generate_local_gen(my_asid, as_obj, new_tp)
         print("[INFO] Configuration changed. Acknowlege to the SCION-COORD server")
-        _, err = request_server(isdas_list, ack_json=updated_vmip)
+        _, err = request_server(isdas_list, ack_json=updated_ases)
         if err:
             print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % err)
             for my_asid, as_obj, old_tp in original_topo:
@@ -154,12 +159,12 @@ def update_local_gen():
 
 def _get_my_asid():
     """
-    Load ISDAS information running on the local machine
+    Load ISD-AS information running on the local machine
     :returns: a list of ISD-AS (e.g., ['1-11', '1-12'])
     """
     path = os.path.normpath('.')
     isdas_list = []
-    for root, dirs, files in os.walk(GEN_PATH):
+    for root, _, _ in os.walk(GEN_PATH):
         depth = root[len(path) + len(os.path.sep):].count(os.path.sep)
         if depth == 2 and 'gen/ISD' in root and 'AS' in root:
             token = root.split('/')
@@ -175,15 +180,13 @@ def _get_my_asid():
 def request_server(isdas_list, ack_json=None):
     """
     Communicate with SCION coordination server over HTTPS.
-    Send get and post requests in order to get newly joined SCIONLabVM's
+    Send get and post requests in order to get newly joined SCIONLabAS's
     information and report the update status respectively.
     :param list isdas_list: given ISD and AS numbers
-    :param dict ack_json: updated SCIONLabVM's IP addresses
+    :param dict ack_json: updated SCIONLabAS's IP addresses
     :returns dict resp_dic:
     """
-    GET_REQ = SCION_COORD_URL + "api/as/getSCIONLabVMASes"
-    POST_REQ = SCION_COORD_URL + "api/as/confirmSCIONLabVMASes"
-    QUERY = "scionLabAS="
+    query = "scionLabAP="
     if ack_json:
         url = POST_REQ + "/" + ACC_ID + "/" + ACC_PW
         try:
@@ -192,7 +195,7 @@ def request_server(isdas_list, ack_json=None):
             return None, e
         return None, None
     else:
-        url = GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + QUERY
+        url = GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
         for my_asid in isdas_list:
             url = url + my_asid
             break  # AT this moment, we only support one AS for a machine
@@ -202,7 +205,7 @@ def request_server(isdas_list, ack_json=None):
             return None, e
         content = resp.content.decode('utf-8')
         resp_dict = json.loads(content)
-        print("[DEBUG] Recieved New SCIONLabVM ASes: \n%s" % resp_dict)
+        print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
 
 
@@ -278,35 +281,41 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
     for req in reqs[req_type]:
         user = req['UserEmail']
         as_id = req['ASID']
-        vm_ip = req['VMIP']
+        as_ip = req['IP']
         is_vpn = req['IsVPN']
-        l4port = req['RemoteIAPort']
+        ap_port = req['APPort']
+        as_port = req['UserPort']
+        br_id = req['APBRID']
+        br_name = _br_name_from_br_id(br_id, my_asid)
+        if_id = br_id # Always use the BR ID as IF ID
+        success = False
 
         if req_type == REMOVE:
-            current_br = req['RemoteBR']
-            if_id = _get_current_ifid(as_id, vm_ip, l4port, tp['BorderRouters'][current_br])
-            if if_id:
-                tp = _remove_topology(current_br, is_vpn, tp)
+            current_br = _get_br_from_as(as_id, tp['BorderRouters'])
+            if current_br and current_br == br_name:
+                tp = _remove_topology(br_name, tp)
                 if is_vpn:
                     _remove_vpn_ip(user)
-                res = {'ASID': as_id, 'VMIP': vm_ip, 'RemoteIAPort': l4port, 'RemoteBR': None}
-                res_list.append(res)
+                success = True
         elif req_type == UPDATE:
-            current_br = req['RemoteBR']
-            if_id = _get_current_br(tp['BorderRouters'][current_br])
-            if if_id:
-                tp = _update_topology(current_br, if_id, as_id, vm_ip, l4port, is_vpn, tp)
+            current_br = _get_br_from_as(as_id, tp['BorderRouters'])
+            if current_br is not None:
+                if current_br == br_name:
+                    tp = _update_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
+                else:
+                    tp = _remove_topology(current_br, tp)
+                    tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 if is_vpn:
-                    _configure_vpn_ip(user, vm_ip)
-                res = {'ASID': as_id, 'VMIP': vm_ip, 'RemoteIAPort': l4port,
-                       'RemoteBR': current_br}
-                res_list.append(res)
+                    _configure_vpn_ip(user, as_ip)
+                success = True
         else:
-            new_br, tp = _create_topology(my_asid, as_id, vm_ip, l4port, is_vpn, tp)
+            tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
             if is_vpn:
-                _configure_vpn_ip(user, vm_ip)
-            res = {'ASID': as_id, 'VMIP': vm_ip, 'RemoteIAPort': l4port, 'RemoteBR': new_br}
-            res_list.append(res)
+                _configure_vpn_ip(user, as_ip)
+            success = True
+
+        if success:
+            res_list.append(as_id)
 
     return tp
 
@@ -345,101 +354,97 @@ def _remove_vpn_ip(user):
     return
 
 
-def _get_current_ifid(as_id, vm_ip, l4port, br_dict):
+def _get_br_from_as(as_id, brs_dict):
     """
-    Parsing border router topology and returns if_id corresponding to the given information
-    :param str as_id: remote AS ID
-    :param str vm_ip: the IP address of the remote AS
-    :param int l4port: the port number of the host AS
-    :param dict br_dict: the border router topology
-    :returns: the interface id as int
+    Parses border router topology and returns the ID of the current border router
+    corresponding to the given ISD-AS string
+    :param str as_id: ISD-AS string
+    :param dict brs_dict: dictionary of all border routers
+    :returns: the border router name corresponding to this AS if it exists
     """
-    for if_id, intf_dict in br_dict['Interfaces'].items():
-        if br_dict['Interfaces'][if_id]['ISD_AS'] != as_id:
-            continue
-        elif br_dict['Interfaces'][if_id]['Remote']['Addr'] != vm_ip:
-            continue
-        elif br_dict['Interfaces'][if_id]['Public']['L4Port'] != l4port:
-            continue
-        else:
-            return if_id
+    for br, br_dict in brs_dict.items():
+        for if_id, _ in br_dict['Interfaces'].items():
+            if br_dict['Interfaces'][if_id]['ISD_AS'] != as_id:
+                continue
+            else:
+                return br
     return None
 
 
-def _get_current_br(br_dict):
-    if len(br_dict['Interfaces'].keys()) is 1:
-        for if_id, intf_dict in br_dict['Interfaces'].items():
-            return if_id
-    return None
-
-
-def _remove_topology(br, is_vpn, tp):
+def _remove_topology(br, tp):
     """
     Remove a border router information from the topology
-    :param str br: border router ID
-    :param bool is_vpn: is this a vpn-based setup
+    :param str br: border router name
     :param dict tp: target AS topology
-    :returns: updated topology as dict
+    :returns: updated topology as dict and success as bool
     """
     del tp['BorderRouters'][br]
     return tp
 
 
-def _update_topology(br, if_id, as_id, vm_ip, l4port, is_vpn, tp):
+def _update_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp):
     """
     Update a border router information from the topology
-    :param str br: border router ID
-    :param int if_id: interface id
+    :param str br_name: name of the border router
+    :param int if_id: interface ID
     :param str as_id: remote AS ID
-    :param str vm_ip: the IP address of the remote AS
-    :param int l4port: the port number of the host AS
+    :param str as_ip: the IP address of the remote AS
+    :param int as_port: the port number of the remote AS
+    :param int ap_port: the port number of the attachment point
     :param bool is_vpn: is this a vpn-based setup
     :param dict tp: target AS topology
     :returns: updated topology as dict
     """
-    tp['BorderRouters'][br]['Interfaces'][if_id]['ISD_AS'] = as_id
-    tp['BorderRouters'][br]['Interfaces'][if_id]['Remote']['Addr'] = vm_ip
-    tp['BorderRouters'][br]['Interfaces'][if_id]['Public']['Addr'] = VPN_ADDR if is_vpn else INTF_ADDR
-    tp['BorderRouters'][br]['Interfaces'][if_id]['Public']['L4Port'] = l4port
+    tp['BorderRouters'][br_name]['Interfaces'][if_id]['ISD_AS'] = as_id
+    tp['BorderRouters'][br_name]['Interfaces'][if_id]['Remote']['Addr'] = as_ip
+    tp['BorderRouters'][br_name]['Interfaces'][if_id]['Remote']['L4Port'] = as_port
+    tp['BorderRouters'][br_name]['Interfaces'][if_id]['Public']['Addr'] = _intf_addr(is_vpn)
+    tp['BorderRouters'][br_name]['Interfaces'][if_id]['Public']['L4Port'] = ap_port
     return tp
 
 
-def _create_topology(my_asid, as_id, vm_ip, l4port, is_vpn, tp):
+def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp):
     """
-    Create and add a border router information to the topology
+    Create and insert border router information in the topology
+    :param str br_name: name of the border router
+    :param int if_id: interface ID
     :param str as_id: remote AS ID
-    :param str vm_ip: the IP address of the remote AS
-    :param int l4port: the port number of the host AS
+    :param str as_ip: the IP address of the remote AS
+    :param int as_port: the port number of the remote AS
+    :param int ap_port: the port number of the attachment point
     :param bool is_vpn: is this a vpn-based setup
     :param dict tp: target AS topology
-    :returns: new border router id and updated topology
+    :returns: updated topology as dict
     """
-    br_id, br_port, if_id, intl_addr, intf_addr, mtu, bandwidth = _get_new_br_obj(
-        my_asid, is_vpn, tp)
+    intl_addr = INTL_ADDR
+    intf_addr = _intf_addr(is_vpn)
+    mtu = MTU
+    bandwidth = BANDWIDTH
 
-    tp['BorderRouters'][br_id] = {
+    tp['BorderRouters'][br_name] = {
         'InternalAddrs': [
             {
                 'Public': [
                     {
                         'Addr': intl_addr,
-                        'L4Port': br_port
+                        'L4Port': ap_port
                     }
                 ]
             }
         ],
         'Interfaces': {
+        # Always use interface 1
             if_id: {
                 "Overlay": "UDP/IPv4",
                 "Bandwidth": bandwidth,
                 "Remote": {
-                    "L4Port": EXTERNAL_PORT,
-                    "Addr": vm_ip
+                    "L4Port": as_port,
+                    "Addr": as_ip
                 },
                 "MTU": mtu,
                 "LinkType": "CHILD",
                 "Public": {
-                    "L4Port": l4port,
+                    "L4Port": ap_port,
                     "Addr": intf_addr
                 },
                 "InternalAddrIdx": 0,
@@ -447,47 +452,30 @@ def _create_topology(my_asid, as_id, vm_ip, l4port, is_vpn, tp):
             }
         }
     }
-    return br_id, tp
+    return tp
 
 
-def _get_new_br_obj(my_asid, is_vpn, tp):
+def _br_id_from_br_name(br_name):
     """
-    Initiating border router objects to create new border router entity
-    :param ISD_AS my_asid: current AS number
-    :param bool is_vpn: is this a vpn-based setup
-    :param dict tp: current AS topology
-    :returns: new border router id, border router port, interface id,
-              internal address, interface address, mtu and bandwidth
+    Parse a border router name and obtain its ID
+    :param str br_name: name of the border router
+    :returns: ID of the border router
     """
-    br_id = []
-    br_port = []
-    if_id = []
-
-    for br_name, br in tp['BorderRouters'].items():
-        br_id.append(int(br_name.split('-')[2]))
-        br_port.append(br['InternalAddrs'][0]['Public'][0]['L4Port'])
-        for ifid, intf in br['Interfaces'].items():
-            if_id.append(int(ifid))
-
-    new_br_id = 'br%s-%s' % (my_asid, _get_lowest_empty_id(br_id))
-    new_br_port = _get_lowest_empty_id(br_port)
-    new_if_id = str(_get_lowest_empty_id(if_id))
-
-    base_br = 'br%s-%s' % (my_asid, max(br_id))
-    base_ifid = list(tp['BorderRouters'][base_br]['Interfaces'].keys())[0]
-    intl_addr = INTL_ADDR
-    intf_addr = VPN_ADDR if is_vpn else INTF_ADDR
-    mtu = tp['BorderRouters'][base_br]['Interfaces'][base_ifid]['MTU']
-    bandwidth = tp['BorderRouters'][base_br]['Interfaces'][base_ifid]['Bandwidth']
-
-    return new_br_id, new_br_port, new_if_id, intl_addr, intf_addr, mtu, bandwidth
+    return int(br_name.split('-')[2])
 
 
-def _get_lowest_empty_id(id_list):
-    for i in range(min(id_list), max(id_list)):
-        if i not in id_list:
-            return i
-    return max(id_list) + 1
+def _br_name_from_br_id(br_id, isdas):
+    """
+    Construct a border router name from its ID
+    :param int br_name: ID of the border router
+    :param str isdas: ISD-AS string of the attachment point
+    :returns: name of the border router
+    """
+    return 'br{}-{}'.format(isdas, br_id)
+
+
+def _intf_addr(is_vpn):
+    return VPN_ADDR if is_vpn else INTF_ADDR
 
 
 def generate_local_gen(my_asid, as_obj, tp):
@@ -529,8 +517,13 @@ def _restart_scion():
 
 
 def main():
+    if not os.path.exists(OPENVPN_CCD):
+        os.makedirs(OPENVPN_CCD)
+    if INTF_ADDR == "":
+        print(Error: INTF_ADDR is not defined)
+        return
     update_local_gen()
+
 
 if __name__ == '__main__':
     main()
-
