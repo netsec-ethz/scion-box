@@ -505,8 +505,8 @@ def generate_local_gen(my_asid, as_obj, tp):
             write_zlog_file(service_type, instance_name, instance_path)
     # We don't need to create zk configration for existing ASes
     # generate_zk_config(tp, ia, GEN_PATH, simple_conf_mode=False)
-    generate_sciond_config(ia, as_obj, tp)
-    generate_prom_config(ia, tp)
+    generate_sciond_config(ia, as_obj, tp, gen_path)
+    generate_prom_config(ia, tp, gen_path)
 
 
 def _restart_scion():
