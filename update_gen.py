@@ -225,7 +225,7 @@ def load_topology(asid):
     try:
         with open(os.path.join(process_path, 'topology.json')) as topo_file:
             topo_dict = json.load(topo_file)
-        with open(os.path.join(process_path, 'keys/as-sig.key')) as sig_file:
+        with open(os.path.join(process_path, 'keys/as-sig.seed')) as sig_file:
             sig_priv_key = sig_file.read()
         with open(os.path.join(process_path, 'keys/as-decrypt.key')) as enc_file:
             enc_priv_key = enc_file.read()
