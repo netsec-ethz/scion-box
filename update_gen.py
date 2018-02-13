@@ -77,6 +77,8 @@ SCION_COORD_URL = "https://coord.scionproto.net/"
 #: Default MTU and bandwidth
 MTU = 1472
 BANDWIDTH = 1000
+#: First internal port assigned to border routers
+BR_INTERNAL_START_PORT = 31050
 
 #: Default key set for new SCIONLabAS join requests
 REMOVE = 'Remove'
@@ -428,7 +430,7 @@ def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 'Public': [
                     {
                         'Addr': intl_addr,
-                        'L4Port': ap_port
+                        'L4Port': BR_INTERNAL_START_PORT - 1 + if_id
                     }
                 ]
             }
