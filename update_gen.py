@@ -96,7 +96,7 @@ POST_REQ = SCION_COORD_URL + "api/as/confirmUpdatesFromAP"
 #         'Create': [
 #             {
 #                 'ASID': '1-4001',
-#                 'IsVPN': true,
+#                 'IsVPN': True,
 #                 'UserEmail': 'user@example.com',
 #                 'IP': '10.8.0.42',
 #                 'UserPort': 50000,
@@ -114,6 +114,7 @@ def update_local_gen():
     """
     The main function that updates the topology configurations
     """
+
     is_modified = False
     updated_ases = {}
     original_topo = []
@@ -164,16 +165,17 @@ def _get_my_asid():
     """
     path = os.path.normpath('.')
     isdas_list = []
-    for root, _, _ in os.walk(GEN_PATH):
+    for root, _, _ in os.walk(os.path.join(PROJECT_ROOT, GEN_PATH)):
+        base_depth = PROJECT_ROOT.count(os.path.sep)
         depth = root[len(path) + len(os.path.sep):].count(os.path.sep)
-        if depth == 2 and 'gen/ISD' in root and 'AS' in root:
+        if depth == base_depth + 2 and 'gen/ISD' in root and 'AS' in root:
             token = root.split('/')
-            isdas = '%s-%s' % (token[1][3:], token[2][2:])
+            isdas = '%s-%s' % (token[-2][3:], token[-1][2:])
             isdas_list.append(isdas)
     if not isdas_list:
         print("[DEBUG] No ASes running on the machine.")
     else:
-        print("[DEBUG] ASes running on the machine: \n%s" % isdas_list)
+        print("[DEBUG] ASes running on the machine: \n\t%s" % isdas_list)
     return isdas_list
 
 
@@ -217,9 +219,9 @@ def load_topology(asid):
     """
     ia = ISD_AS(asid)
     as_path = 'ISD%s/AS%s' % (ia[0], ia[1])
-    process_path = _get_process_path(os.path.join(GEN_PATH, as_path))
+    process_path = _get_process_path(os.path.join(PROJECT_ROOT, GEN_PATH, as_path))
     try:
-        with open(os.path.join(PROJECT_ROOT, process_path, 'topology.json')) as topo_file:
+        with open(os.path.join(process_path, 'topology.json')) as topo_file:
             topo_dict = json.load(topo_file)
         with open(os.path.join(process_path, 'keys/as-sig.key')) as sig_file:
             sig_priv_key = sig_file.read()
@@ -316,7 +318,6 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
 
         if success:
             res_list.append(as_id)
-
     return tp
 
 
@@ -486,8 +487,9 @@ def generate_local_gen(my_asid, as_obj, tp):
     :param dict tp: the topology parameter file as a dict of dicts
     """
     ia = TopoID(my_asid)
-    write_dispatcher_config(GEN_PATH)
-    as_path = get_elem_dir(GEN_PATH, ia, "")
+    gen_path = os.path.join(PROJECT_ROOT, GEN_PATH)
+    write_dispatcher_config(gen_path)
+    as_path = get_elem_dir(gen_path, ia, "")
     rmtree(as_path, True)
     for service_type, type_key in TYPES_TO_KEYS.items():
         executable_name = TYPES_TO_EXECUTABLES[service_type]
@@ -495,7 +497,7 @@ def generate_local_gen(my_asid, as_obj, tp):
         for instance_name in instances:
             config = prep_supervisord_conf(tp[type_key][instance_name], executable_name,
                                            service_type, instance_name, ia)
-            instance_path = get_elem_dir(GEN_PATH, ia, instance_name)
+            instance_path = get_elem_dir(gen_path, ia, instance_name)
             write_certs_trc_keys(ia, as_obj, instance_path)
             write_as_conf_and_path_policy(ia, as_obj, instance_path)
             write_supervisord_config(config, instance_path)
@@ -503,14 +505,15 @@ def generate_local_gen(my_asid, as_obj, tp):
             write_zlog_file(service_type, instance_name, instance_path)
     # We don't need to create zk configration for existing ASes
     # generate_zk_config(tp, ia, GEN_PATH, simple_conf_mode=False)
-    generate_sciond_config(ia, as_obj, tp)
-    generate_prom_config(ia, tp)
+    generate_sciond_config(ia, as_obj, tp, gen_path)
+    generate_prom_config(ia, tp, gen_path)
 
 
 def _restart_scion():
-    scion_command = os.path.join(PROJECT_ROOT, "scion.sh")
+    scion_command = "./scion.sh"
     supervisord_command = os.path.expanduser("~/.local/bin/supervisorctl")
 
+    os.chdir(PROJECT_ROOT)
     call([scion_command, "stop"])
     call([supervisord_command, "-c", "supervisor/supervisord.conf", "shutdown"])
     call([scion_command, "run"])
@@ -520,7 +523,7 @@ def main():
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
     if INTF_ADDR == "":
-        print(Error: INTF_ADDR is not defined)
+        print("Error: INTF_ADDR is not defined")
         return
     update_local_gen()
 
