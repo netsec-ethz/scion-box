@@ -291,7 +291,7 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
         as_port = req['UserPort']
         br_id = req['APBRID']
         br_name = _br_name_from_br_id(br_id, my_asid)
-        if_id = br_id # Always use the BR ID as IF ID
+        if_id = str(br_id) # Always use the BR ID as IF ID
         success = False
 
         if req_type == REMOVE:
@@ -389,7 +389,7 @@ def _update_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
     """
     Update a border router information from the topology
     :param str br_name: name of the border router
-    :param int if_id: interface ID
+    :param str if_id: interface ID
     :param str as_id: remote AS ID
     :param str as_ip: the IP address of the remote AS
     :param int as_port: the port number of the remote AS
@@ -410,7 +410,7 @@ def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
     """
     Create and insert border router information in the topology
     :param str br_name: name of the border router
-    :param int if_id: interface ID
+    :param str if_id: interface ID
     :param str as_id: remote AS ID
     :param str as_ip: the IP address of the remote AS
     :param int as_port: the port number of the remote AS
@@ -430,7 +430,7 @@ def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                 'Public': [
                     {
                         'Addr': intl_addr,
-                        'L4Port': BR_INTERNAL_START_PORT - 1 + if_id
+                        'L4Port': BR_INTERNAL_START_PORT - 1 + int(if_id)
                     }
                 ]
             }
