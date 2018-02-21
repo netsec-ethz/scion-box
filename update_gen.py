@@ -25,6 +25,7 @@ import requests
 from shutil import rmtree
 from subprocess import call
 import yaml
+import argparse
 
 
 # SCION
@@ -520,8 +521,29 @@ def _restart_scion():
     call([supervisord_command, "-c", "supervisor/supervisord.conf", "shutdown"])
     call([scion_command, "run"])
 
+def parse_command_line_args():
+    global SCION_COORD_URL, INTF_ADDR, INTL_ADDR, ACC_ID, ACC_PW
+    parser = argparse.ArgumentParser(description="Update the SCION gen directory")
+    parser.add_argument("--url", nargs="?", type=str,
+                        help="URL or the coordinator service")
+    parser.add_argument("--address", nargs="?", type=str,
+                        help="The interface address")
+    parser.add_argument("--internal", nargs="?", type=str,
+                        help="The internal address")
+    parser.add_argument("--id", nargs="?", type=str,
+                        help="The SCION Coordinator user ID that has permission to access this AS")
+    parser.add_argument("--password", nargs="?", type=str,
+                        help="The password for the SCION Coordinator user that has permission to access this AS")
+
+    args = parser.parse_args()
+    SCION_COORD_URL = args.url if args.url else SCION_COORD_URL
+    INTF_ADDR = args.address if args.address else INTF_ADDR
+    INTL_ADDR = args.internal if args.internal else INTF_ADDR # copy it from INTF_ADDR if not specified
+    ACC_ID = args.id if args.id else ACC_ID
+    ACC_PW = args.password if args.password else ACC_PW
 
 def main():
+    parse_command_line_args()
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
     if INTF_ADDR == "":
