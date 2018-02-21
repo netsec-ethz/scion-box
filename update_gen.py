@@ -532,8 +532,8 @@ def parse_command_line_args():
                         help="The internal address")
     parser.add_argument("--id", nargs="?", type=str,
                         help="The SCION Coordinator user ID that has permission to access this AS")
-    parser.add_argument("--password", nargs="?", type=str,
-                        help="The password for the SCION Coordinator user that has permission to access this AS")
+    parser.add_argument("--secret", nargs="?", type=str,
+                        help="The secret for the SCION Coordinator user that has permission to access this AS")
 
     args = parser.parse_args()
     SCION_COORD_URL = args.url if args.url else SCION_COORD_URL
