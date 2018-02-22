@@ -74,7 +74,7 @@ INTL_ADDR = INTF_ADDR
 VPN_ADDR = "10.0.8.1"
 VPN_NETMASK = "255.255.255.0"
 #: URL of SCION Coordination Service
-SCION_COORD_URL = "https://coord.scionproto.net/"
+SCION_COORD_URL = "https://coord.scionproto.net"
 #: Default MTU and bandwidth
 MTU = 1472
 BANDWIDTH = 1000
@@ -90,8 +90,9 @@ REMOVED = 'Removed'
 UPDATED = 'Updated'
 CREATED = 'Created'
 #: API calls at the coordinator
-GET_REQ = SCION_COORD_URL + "api/as/getUpdatesForAP"
-POST_REQ = SCION_COORD_URL + "api/as/confirmUpdatesFromAP"
+GET_REQ = "api/as/getUpdatesForAP"
+POST_REQ = "api/as/confirmUpdatesFromAP"
+ONLY_AS_TO_UPDATE = None
 
 # Template for new_as_dict
 # new_as_dict = {
@@ -193,17 +194,17 @@ def request_server(isdas_list, ack_json=None):
     """
     query = "scionLabAP="
     if ack_json:
-        url = POST_REQ + "/" + ACC_ID + "/" + ACC_PW
+        url = SCION_COORD_URL + "/" + POST_REQ + "/" + ACC_ID + "/" + ACC_PW
         try:
             resp = requests.post(url, json=ack_json)
         except requests.exceptions.ConnectionError as e:
             return None, e
         return None, None
     else:
-        url = GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
-        for my_asid in isdas_list:
-            url = url + my_asid
-            break  # AT this moment, we only support one AS for a machine
+        url = SCION_COORD_URL + "/" + GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
+        # AT this moment, we only support one AS for a machine
+        my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
+        url += my_asid
         try:
             resp = requests.get(url)
         except requests.exceptions.ConnectionError as e:
@@ -496,6 +497,8 @@ def generate_local_gen(my_asid, as_obj, tp):
     rmtree(as_path, True)
     for service_type, type_key in TYPES_TO_KEYS.items():
         executable_name = TYPES_TO_EXECUTABLES[service_type]
+        if type_key not in tp:
+            continue
         instances = tp[type_key].keys()
         for instance_name in instances:
             config = prep_supervisord_conf(tp[type_key][instance_name], executable_name,
@@ -522,25 +525,28 @@ def _restart_scion():
     call([scion_command, "run"])
 
 def parse_command_line_args():
-    global SCION_COORD_URL, INTF_ADDR, INTL_ADDR, ACC_ID, ACC_PW
+    global SCION_COORD_URL, INTF_ADDR, INTL_ADDR, ACC_ID, ACC_PW, ONLY_AS_TO_UPDATE
     parser = argparse.ArgumentParser(description="Update the SCION gen directory")
     parser.add_argument("--url", nargs="?", type=str,
-                        help="URL or the coordinator service")
+                        help="URL of the Coordination service")
     parser.add_argument("--address", nargs="?", type=str,
                         help="The interface address")
     parser.add_argument("--internal", nargs="?", type=str,
                         help="The internal address")
-    parser.add_argument("--id", nargs="?", type=str,
-                        help="The SCION Coordinator user ID that has permission to access this AS")
+    parser.add_argument("--accountId", nargs="?", type=str,
+                        help="The SCION Coordinator account ID that has permission to access this AS")
     parser.add_argument("--secret", nargs="?", type=str,
-                        help="The secret for the SCION Coordinator user that has permission to access this AS")
+                        help="The secret for the SCION Coordinator account that has permission to access this AS")
+    parser.add_argument("--updateAS", nargs="?", type=str, metavar="IA, e.g. 1-12",
+                        help="The AS to update. If not specified, the first one from the existing ones will be updated")
 
     args = parser.parse_args()
     SCION_COORD_URL = args.url if args.url else SCION_COORD_URL
     INTF_ADDR = args.address if args.address else INTF_ADDR
     INTL_ADDR = args.internal if args.internal else INTF_ADDR # copy it from INTF_ADDR if not specified
-    ACC_ID = args.id if args.id else ACC_ID
+    ACC_ID = args.accountId if args.accountId else ACC_ID
     ACC_PW = args.secret if args.secret else ACC_PW
+    ONLY_AS_TO_UPDATE = args.updateAS
 
 def main():
     parse_command_line_args()
