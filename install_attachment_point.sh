@@ -1,13 +1,20 @@
 #!/bin/bash
 # checks if this attachment point is ready. Sets it if not.
-set -e -x
+set -e
 
-usage="$(basename $0) -n 'Name'
+PORT=1194
+NETWORK="10.0.8.0"
+SUBNET="255.255.255.0"
+
+usage="$(basename $0) -n 'Name' [-p 1194] [-s 255.255.255.0]
 Four files need to be present in the working directory: ca.crt, dh4096.pem, Name.crt and Name.key
 
 where:
-    -n Name     Name of this AS, also used for two of the files."
-while getopts ":n:" opt; do
+    -n Name     Name of this AS, also used for two of the files.
+    -p Port     Port where the OpenVPN server will listen. Defaults to 1194.
+    -i Net      Network for the OpenVPN server. Defaults to 10.0.8.0
+    -s Subnet   Subnet to configure the OpenVPN server. Defaults to 255.255.255.0"
+while getopts ":n:p:i:s:" opt; do
 case $opt in
     h)
         echo "$usage"
@@ -15,6 +22,15 @@ case $opt in
         ;;
     n)
         asname="$OPTARG"
+        ;;
+    p)
+        PORT="$OPTARG"
+        ;;
+    i)
+        NETWORK="$OPTARG"
+        ;;
+    s)
+        SUBNET="$OPTARG"
         ;;
     \?)
         echo "Invalid option: -$OPTARG" >&2
@@ -42,7 +58,7 @@ if [ ! -f "ca.crt" ] || [ ! -f "dh4096.pem" ] || [ ! -f "$asname.crt" ] || [ ! -
 fi
 
 OPENVPNSERVERCONF=$(cat <<ENDOFCONF
-port 1194
+port $PORT
 proto udp
 dev tun
 
@@ -53,9 +69,9 @@ key  $asname.key  # This file should be kept secret
 dh   dh4096.pem
 
 topology subnet
-server 10.0.8.0 255.255.255.0
+server $NETWORK $SUBNET
 ifconfig-pool-persist ipp.txt
-client-config-dir /home/scion/openvpn_ccd
+client-config-dir /home/$USER/openvpn_ccd
 keepalive 10 120
 ;tls-auth ta.key 0 # This file is secret
 comp-lzo
@@ -94,8 +110,9 @@ sudo sed -i -- 's/^#.*net.ipv4.ip_forward=1\(.*\)$/net.ipv4.ip_forward=1\1/g' "/
 
 
 # start service systemctl start openvpn@server
-sudo systemctl stop "openvpn@server"
+sudo systemctl stop "openvpn@server" || true
 sudo systemctl start "openvpn@server"
 sudo systemctl enable "openvpn@server"
 
 # TODO copy and run update gen
+echo "Done."
