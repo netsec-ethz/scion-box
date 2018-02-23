@@ -60,21 +60,12 @@ from local_config_util import (
 """
 The following configurations need to be customized to the AP
 """
-#: Default SCION-coord server account ID
-ACC_ID = ""
-#: Default SCION-coord server account PW
-ACC_PW = ""
 #: Client configuration directory for openvpn
 OPENVPN_CCD = os.path.expanduser("~/openvpn_ccd")
 #: Different IP addresses
-# IP address used by remote border routers for connections (default: public IP address)
-INTF_ADDR = ""
-# Internal address the border routers should bind to (default: same as INTF_ADDR)
-INTL_ADDR = INTF_ADDR
 VPN_ADDR = "10.0.8.1"
 VPN_NETMASK = "255.255.255.0"
-#: URL of SCION Coordination Service
-SCION_COORD_URL = "https://coord.scionproto.net"
+
 #: Default MTU and bandwidth
 MTU = 1472
 BANDWIDTH = 1000
@@ -527,34 +518,38 @@ def _restart_scion():
 def parse_command_line_args():
     global SCION_COORD_URL, INTF_ADDR, INTL_ADDR, ACC_ID, ACC_PW, ONLY_AS_TO_UPDATE
     parser = argparse.ArgumentParser(description="Update the SCION gen directory")
-    parser.add_argument("--url", nargs="?", type=str,
+    parser.add_argument("--url", required=True, type=str,
                         help="URL of the Coordination service")
-    parser.add_argument("--address", nargs="?", type=str,
+    parser.add_argument("--address", required=True, type=str,
                         help="The interface address")
     parser.add_argument("--internal", nargs="?", type=str,
                         help="The internal address")
-    parser.add_argument("--accountId", nargs="?", type=str,
+    parser.add_argument("--accountId", required=True, type=str,
                         help="The SCION Coordinator account ID that has permission to access this AS")
-    parser.add_argument("--secret", nargs="?", type=str,
+    parser.add_argument("--secret", required=True, type=str,
                         help="The secret for the SCION Coordinator account that has permission to access this AS")
     parser.add_argument("--updateAS", nargs="?", type=str, metavar="IA, e.g. 1-12",
                         help="The AS to update. If not specified, the first one from the existing ones will be updated")
 
+    # The required arguments will be present, or parse_args will exit the application
     args = parser.parse_args()
-    SCION_COORD_URL = args.url if args.url else SCION_COORD_URL
-    INTF_ADDR = args.address if args.address else INTF_ADDR
+    # URL of SCION Coordination Service
+    SCION_COORD_URL = args.url
+    # IP address used by remote border routers for connections (default: public IP address)
+    INTF_ADDR = args.address
+    # Internal address the border routers should bind to (default: same as INTF_ADDR)
     INTL_ADDR = args.internal if args.internal else INTF_ADDR # copy it from INTF_ADDR if not specified
-    ACC_ID = args.accountId if args.accountId else ACC_ID
-    ACC_PW = args.secret if args.secret else ACC_PW
+    # Default SCION-coord server account ID
+    ACC_ID = args.accountId
+    # Default SCION-coord server account PW
+    ACC_PW = args.secret
+    # If set, that is the AS to be updated, instead of the first one from the list of running ASes
     ONLY_AS_TO_UPDATE = args.updateAS
 
 def main():
     parse_command_line_args()
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
-    if INTF_ADDR == "":
-        print("Error: INTF_ADDR is not defined")
-        return
     update_local_gen()
 
 
