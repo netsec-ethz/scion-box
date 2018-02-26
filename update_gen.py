@@ -201,6 +201,8 @@ def request_server(isdas_list, ack_json=None):
         except requests.exceptions.ConnectionError as e:
             return None, e
         content = resp.content.decode('utf-8')
+        if resp.status_code != 200:
+            return None, content
         resp_dict = json.loads(content)
         print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
