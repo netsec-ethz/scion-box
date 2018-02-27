@@ -222,6 +222,8 @@ def load_topology(asid):
             topo_dict = json.load(topo_file)
         with open(os.path.join(process_path, 'keys/as-sig.seed')) as sig_file:
             sig_priv_key = sig_file.read()
+        with open(os.path.join(process_path, 'keys/as-sig.key')) as sig_file:
+            sig_priv_key_raw = sig_file.read()
         with open(os.path.join(process_path, 'keys/as-decrypt.key')) as enc_file:
             enc_priv_key = enc_file.read()
         with open(os.path.join(process_path, 'certs/ISD%s-AS%s-V%s.crt' %
@@ -235,7 +237,13 @@ def load_topology(asid):
     except OSError as e:
         print("[ERROR] Unable to open '%s': \n%s" % (e.filename, e.strerror))
         exit(1)
-    as_obj = ASCredential(sig_priv_key, enc_priv_key, certificate, trc, master_as_key)
+    key_dict = {
+        'enc_key': enc_priv_key,
+        'sig_key': sig_priv_key,
+        'sig_key_raw': sig_priv_key_raw,
+        'master_as_key': master_as_key,
+    }
+    as_obj = ASCredential(certificate, trc, key_dict)
     return as_obj, topo_dict
 
 
