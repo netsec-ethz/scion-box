@@ -99,7 +99,7 @@ POST_REQ = SCION_COORD_URL + "api/as/confirmUpdatesFromAP"
 #             {
 #                 'ASID': '1-4001',
 #                 'IsVPN': True,
-#                 'UserEmail': 'user@example.com',
+#                 'VPNUserID': 'user@example.com_4001',
 #                 'IP': '10.8.0.42',
 #                 'UserPort': 50000,
 #                 'APPort': 50050,
@@ -283,7 +283,7 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
     :returns: the updated topology as dict
     """
     for req in reqs[req_type]:
-        user = req['UserEmail']
+        user = req['VPNUserID']
         as_id = req['ASID']
         as_ip = req['IP']
         is_vpn = req['IsVPN']
