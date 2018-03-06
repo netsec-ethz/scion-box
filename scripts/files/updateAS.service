@@ -7,13 +7,9 @@ Wants=network-online.target scion.service
 Type=oneshot
 RemainAfterExit=no
 User=_USER_
-WorkingDirectory=/tmp
+WorkingDirectory=/home/_USER_/.local/bin
 Environment="PATH=/home/_USER_/.local/bin:/home/_USER_/go/bin:/usr/local/go/bin:/home/_USER_/bin:/home/_USER_/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin" "GOPATH=/home/_USER_/go"
-
-ExecStart=/usr/bin/scionupgrade.sh
-
-
-
+ExecStart=/home/_USER_/.local/bin/scionLab.sh
 
 [Install]
 WantedBy=multi-user.target

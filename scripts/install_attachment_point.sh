@@ -1,7 +1,6 @@
 #!/bin/bash
 # checks if this attachment point is ready. Sets it if not.
 set -e
-set -x
 
 PORT=1194
 NETWORK="10.0.8.0"
@@ -100,14 +99,13 @@ fi
 # copy server conf to /etc/openvpn/server.conf
 TMPFILE=$(mktemp)
 cp "server.conf" "$TMPFILE"
-sed -i -- "s/__PORT__/$PORT/g" "$TMPFILE"
+sed -i -- "s/_PORT_/$PORT/g" "$TMPFILE"
 
-sed -i -- "s/__ASNAME__/$asname/g" "$TMPFILE"
-sed -i -- "s/__NETWORK__/$NETWORK/g" "$TMPFILE"
-sed -i -- "s/__SUBNET__/$SUBNET/g" "$TMPFILE"
-sed -i -- "s/__USER__/$USER/g" "$TMPFILE"
-# TODO uncomment
-#sudo mv "$TMPFILE" "/etc/openvpn/server.conf"
+sed -i -- "s/_ASNAME_/$asname/g" "$TMPFILE"
+sed -i -- "s/_NETWORK_/$NETWORK/g" "$TMPFILE"
+sed -i -- "s/_SUBNET_/$SUBNET/g" "$TMPFILE"
+sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
+sudo mv "$TMPFILE" "/etc/openvpn/server.conf"
 
 # copy the 4 files from coordinator
 sudo cp "${vpn_files[@]}" "/etc/openvpn/"
@@ -124,20 +122,26 @@ sudo systemctl stop "openvpn@server" || true
 sudo systemctl start "openvpn@server"
 sudo systemctl enable "openvpn@server"
 
-# TODO create the three gen/ files\
-# ia, account_secret account_id
+# create the three ia, account_secret account_id files under gen :
 pushd "$SC/gen" >/dev/null
-echo "$ia" > "ia"
-echo "$ACC_ID" > account_id
-echo "$ACC_PWD" > account_secret
+printf "$ia" > "ia"
+printf "$ACC_ID" > account_id
+printf "$ACC_PWD" > account_secret
 popd >/dev/null
 
-# TODO copy and run update gen
-sudo cp "${updater_files[@]}" "/usr/local/bin/"
+# copy and run update gen
+sudo cp "${updater_files[@]}" "$HOME/.local/bin/"
 for f in "${service_files[@]}"; do
     cp "$f" "$TMPFILE"
-    sed -i -- "s/__USER__/$USER/g" "$TMPFILE"
-    sudo cp "$TMPFILE" "/etc/systemd/system/"
+    sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
+    sudo cp "$TMPFILE" "/etc/systemd/system/$(basename $f)"
 done
+sudo systemctl stop "updateAS.timer" || stop
+sudo systemctl stop "updateAS.service" || stop
+sudo systemctl daemon-reload
+sudo systemctl start "updateAS.service"
+sudo systemctl enable "updateAS.service"
+sudo systemctl start "updateAS.timer"
+sudo systemctl enable "updateAS.timer"
 
 echo "Done."
