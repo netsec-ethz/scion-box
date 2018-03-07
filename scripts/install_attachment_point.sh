@@ -130,7 +130,7 @@ printf "$ACC_PWD" > account_secret
 popd >/dev/null
 
 # copy and run update gen
-sudo cp "${updater_files[@]}" "$HOME/.local/bin/"
+cp "${updater_files[@]}" "$HOME/.local/bin/"
 for f in "${service_files[@]}"; do
     cp "$f" "$TMPFILE"
     sed -i -- "s/_USER_/$USER/g" "$TMPFILE"

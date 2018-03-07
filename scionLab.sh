@@ -5,10 +5,15 @@
 set -e
 SC="$HOME/go/src/github.com/scionproto/scion"
 BASE=$(dirname $0)
-
-IA=$(cat $SC/gen/ia)
-ACC_ID=$(cat $SC/gen/account_id)
-ACC_PW=$(cat $SC/gen/account_secret)
+if [ -f "$SC/gen/ia" ]; then
+    IA=$(cat $SC/gen/ia)
+fi
+if [ -f "$SC/gen/account_id" ]; then
+    ACC_ID=$(cat $SC/gen/account_id)
+fi
+if [ -f "$SC/gen/account_secret" ]; then
+    ACC_PW=$(cat $SC/gen/account_secret)
+fi
 IP_ADDR=$(hostname -I | awk '{print $1}')
 URL="https://scion-ad6.inf.ethz.ch"
 
