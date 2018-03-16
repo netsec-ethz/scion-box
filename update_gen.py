@@ -518,11 +518,12 @@ def generate_local_gen(my_asid, as_obj, tp):
 
 def _restart_scion():
     scion_command = "./scion.sh"
-    supervisord_command = os.path.expanduser("~/.local/bin/supervisorctl")
+    supervisor_command = "./supervisor/supervisor.sh"
 
     os.chdir(PROJECT_ROOT)
     call([scion_command, "stop"])
-    call([supervisord_command, "-c", "supervisor/supervisord.conf", "shutdown"])
+    call([supervisor_command, "shutdown"])
+    call([supervisor_command, "reload"])
     call([scion_command, "run"])
 
 def parse_command_line_args():
