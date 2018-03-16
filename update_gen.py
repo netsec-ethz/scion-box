@@ -25,6 +25,7 @@ import requests
 from shutil import rmtree
 from subprocess import call
 import yaml
+import argparse
 
 
 # SCION
@@ -59,21 +60,12 @@ from local_config_util import (
 """
 The following configurations need to be customized to the AP
 """
-#: Default SCION-coord server account ID
-ACC_ID = ""
-#: Default SCION-coord server account PW
-ACC_PW = ""
 #: Client configuration directory for openvpn
 OPENVPN_CCD = os.path.expanduser("~/openvpn_ccd")
 #: Different IP addresses
-# IP address used by remote border routers for connections (default: public IP address)
-INTF_ADDR = ""
-# Internal address the border routers should bind to (default: same as INTF_ADDR)
-INTL_ADDR = INTF_ADDR
 VPN_ADDR = "10.0.8.1"
 VPN_NETMASK = "255.255.255.0"
-#: URL of SCION Coordination Service
-SCION_COORD_URL = "https://coord.scionproto.net/"
+
 #: Default MTU and bandwidth
 MTU = 1472
 BANDWIDTH = 1000
@@ -89,8 +81,9 @@ REMOVED = 'Removed'
 UPDATED = 'Updated'
 CREATED = 'Created'
 #: API calls at the coordinator
-GET_REQ = SCION_COORD_URL + "api/as/getUpdatesForAP"
-POST_REQ = SCION_COORD_URL + "api/as/confirmUpdatesFromAP"
+GET_REQ = "api/as/getUpdatesForAP"
+POST_REQ = "api/as/confirmUpdatesFromAP"
+ONLY_AS_TO_UPDATE = None
 
 # Template for new_as_dict
 # new_as_dict = {
@@ -192,22 +185,24 @@ def request_server(isdas_list, ack_json=None):
     """
     query = "scionLabAP="
     if ack_json:
-        url = POST_REQ + "/" + ACC_ID + "/" + ACC_PW
+        url = SCION_COORD_URL + "/" + POST_REQ + "/" + ACC_ID + "/" + ACC_PW
         try:
             resp = requests.post(url, json=ack_json)
         except requests.exceptions.ConnectionError as e:
             return None, e
         return None, None
     else:
-        url = GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
-        for my_asid in isdas_list:
-            url = url + my_asid
-            break  # AT this moment, we only support one AS for a machine
+        url = SCION_COORD_URL + "/" + GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
+        # AT this moment, we only support one AS for a machine
+        my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
+        url += my_asid
         try:
             resp = requests.get(url)
         except requests.exceptions.ConnectionError as e:
             return None, e
         content = resp.content.decode('utf-8')
+        if resp.status_code != 200:
+            return None, content
         resp_dict = json.loads(content)
         print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
@@ -227,6 +222,8 @@ def load_topology(asid):
             topo_dict = json.load(topo_file)
         with open(os.path.join(process_path, 'keys/as-sig.seed')) as sig_file:
             sig_priv_key = sig_file.read()
+        with open(os.path.join(process_path, 'keys/as-sig.key')) as sig_file:
+            sig_priv_key_raw = sig_file.read()
         with open(os.path.join(process_path, 'keys/as-decrypt.key')) as enc_file:
             enc_priv_key = enc_file.read()
         with open(os.path.join(process_path, 'certs/ISD%s-AS%s-V%s.crt' %
@@ -240,7 +237,13 @@ def load_topology(asid):
     except OSError as e:
         print("[ERROR] Unable to open '%s': \n%s" % (e.filename, e.strerror))
         exit(1)
-    as_obj = ASCredential(sig_priv_key, enc_priv_key, certificate, trc, master_as_key)
+    key_dict = {
+        'enc_key': enc_priv_key,
+        'sig_key': sig_priv_key,
+        'sig_key_raw': sig_priv_key_raw,
+        'master_as_key': master_as_key,
+    }
+    as_obj = ASCredential(certificate, trc, key_dict)
     return as_obj, topo_dict
 
 
@@ -495,6 +498,8 @@ def generate_local_gen(my_asid, as_obj, tp):
     rmtree(as_path, True)
     for service_type, type_key in TYPES_TO_KEYS.items():
         executable_name = TYPES_TO_EXECUTABLES[service_type]
+        if type_key not in tp:
+            continue
         instances = tp[type_key].keys()
         for instance_name in instances:
             config = prep_supervisord_conf(tp[type_key][instance_name], executable_name,
@@ -520,13 +525,41 @@ def _restart_scion():
     call([supervisord_command, "-c", "supervisor/supervisord.conf", "shutdown"])
     call([scion_command, "run"])
 
+def parse_command_line_args():
+    global SCION_COORD_URL, INTF_ADDR, INTL_ADDR, ACC_ID, ACC_PW, ONLY_AS_TO_UPDATE
+    parser = argparse.ArgumentParser(description="Update the SCION gen directory")
+    parser.add_argument("--url", required=True, type=str,
+                        help="URL of the Coordination service")
+    parser.add_argument("--address", required=True, type=str,
+                        help="The interface address")
+    parser.add_argument("--internal", nargs="?", type=str,
+                        help="The internal address")
+    parser.add_argument("--accountId", required=True, type=str,
+                        help="The SCION Coordinator account ID that has permission to access this AS")
+    parser.add_argument("--secret", required=True, type=str,
+                        help="The secret for the SCION Coordinator account that has permission to access this AS")
+    parser.add_argument("--updateAS", nargs="?", type=str, metavar="IA, e.g. 1-12",
+                        help="The AS to update. If not specified, the first one from the existing ones will be updated")
+
+    # The required arguments will be present, or parse_args will exit the application
+    args = parser.parse_args()
+    # URL of SCION Coordination Service
+    SCION_COORD_URL = args.url
+    # IP address used by remote border routers for connections (default: public IP address)
+    INTF_ADDR = args.address
+    # Internal address the border routers should bind to (default: same as INTF_ADDR)
+    INTL_ADDR = args.internal if args.internal else INTF_ADDR # copy it from INTF_ADDR if not specified
+    # Default SCION-coord server account ID
+    ACC_ID = args.accountId
+    # Default SCION-coord server account PW
+    ACC_PW = args.secret
+    # If set, that is the AS to be updated, instead of the first one from the list of running ASes
+    ONLY_AS_TO_UPDATE = args.updateAS
 
 def main():
+    parse_command_line_args()
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
-    if INTF_ADDR == "":
-        print("Error: INTF_ADDR is not defined")
-        return
     update_local_gen()
 
 

@@ -3,4 +3,4 @@
 
 export PYTHONPATH=$SC:$SC/python:sub/util/:.
 
-python3 ./update_gen.py
+python3 ./update_gen.py $*
