@@ -24,12 +24,10 @@ case $opt in
         ia="$OPTARG"
         asname="AS$ia"
         ;;
-    i)
-        ;;
     p)
         PORT="$OPTARG"
         ;;
-    i)
+    n)
         NETWORK="$OPTARG"
         ;;
     s)
