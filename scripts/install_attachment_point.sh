@@ -2,9 +2,13 @@
 # checks if this attachment point is ready. Sets it if not.
 set -e
 
+
 PORT=1194
 NETWORK="10.0.8.0"
 SUBNET="255.255.255.0"
+testing=0
+
+thisdir="$(dirname $0)"
 
 usage="$(basename $0) -i IA -a account_id -b account_secret [-p 1194] [-s 255.255.255.0]
 where:
@@ -13,8 +17,9 @@ where:
     -n Net          Network for the OpenVPN server. Defaults to 10.0.8.0
     -s Subnet       Subnet to configure the OpenVPN server. Defaults to 255.255.255.0
     -a account_id   Account ID
-    -b ac._secret   Account secret"
-while getopts ":i:p:n:s:a:b:" opt; do
+    -b ac._secret   Account secret
+    -t              Testing only. Skip VPN and systemd configurations."
+while getopts ":hi:p:n:s:a:b:t" opt; do
 case $opt in
     h)
         echo "$usage"
@@ -39,6 +44,9 @@ case $opt in
     b)
         ACC_PWD="$OPTARG"
         ;;
+    t)
+        testing=1
+        ;;
     \?)
         echo "Invalid option: -$OPTARG" >&2
         echo "$usage" >&2
@@ -51,6 +59,13 @@ case $opt in
         ;;
 esac
 done
+
+pip3 install -r "$thisdir/../requirements.txt"
+
+if [ "$testing" -eq 1 ]; then
+    echo "Only testing. Exiting."
+    exit 0
+fi
 
 if [ -z "$asname" ] || [ -z "$ACC_ID" ] || [ -z "$ACC_PWD" ]; then
     echo "$usage"
