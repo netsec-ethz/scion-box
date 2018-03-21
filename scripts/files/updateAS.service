@@ -10,6 +10,7 @@ User=_USER_
 WorkingDirectory=/home/_USER_/.local/bin
 Environment="PATH=/home/_USER_/.local/bin:/home/_USER_/go/bin:/usr/local/go/bin:/home/_USER_/bin:/home/_USER_/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin" "GOPATH=/home/_USER_/go"
 ExecStart=/home/_USER_/.local/bin/scionLab.sh
+KillMode=none # because scionLab.sh can call scion.sh run, which calls supervisor to spawn processes. We need those not to be killed when scionLab.sh exits.
 
 [Install]
 WantedBy=multi-user.target
