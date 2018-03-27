@@ -6,7 +6,7 @@ set -e
 SC="$HOME/go/src/github.com/scionproto/scion"
 BASE=$(dirname $0)
 if [ -f "$SC/gen/ia" ]; then
-    IA=$(cat $SC/gen/ia)
+    IAS=$(cat $SC/gen/ia)
 fi
 if [ -f "$SC/gen/account_id" ]; then
     ACC_ID=$(cat $SC/gen/account_id)
@@ -18,4 +18,8 @@ IP_ADDR=$(hostname -I | awk '{print $1}')
 URL="https://scion-ad6.inf.ethz.ch"
 
 export PYTHONPATH=$SC:$SC/python:$BASE/sub/util/:$BASE
-python3 $BASE/update_gen.py --url "$URL" --updateAS "$IA" --accountId "$ACC_ID" --secret "$ACC_PW" --address "$IP_ADDR" $*
+while read -r IA; do
+    echo "Updating AP for IA: $IA ..."
+    python3 $BASE/update_gen.py --url "$URL" --updateAS "$IA" --accountId "$ACC_ID" --secret "$ACC_PW" --address "$IP_ADDR" $*
+done <<< "$IAS"
+echo "Done updating AP."
