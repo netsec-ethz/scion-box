@@ -97,7 +97,8 @@ if [ ! -z "$missingFiles" ]; then
     echo "For this script to work we need the following files in the working directory:"
     echo "${files[@]}"
     echo "But there are missing files:"
-    echo "${missingFiles[@]}"   
+    echo "${missingFiles[@]}"
+    echo "Get the .key and .crt files from the Coordinator. Run ./build-key-server $asname"
     exit 1
 fi
 
