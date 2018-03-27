@@ -9,7 +9,7 @@ To setup an Attachment Point (AP) we will need several files:
   - dh4096.pem
   - my_AS.crt
   - my_AS.key
-- `update_gen.py` and `scionLab.sh` scripts. These allow the installed AS (that has an AP) to update itself, e.g. when another AS has been attached to this one.
+- `update_gen.py` and `updateGen.sh` scripts. These allow the installed AS (that has an AP) to update itself, e.g. when another AS has been attached to this one.
 - `install_attachment_point.sh` script. Just convenient to setup the VPN for the AP. In the future this script may do more, like checking some ports are not blocked by a firewall, etc.
 The script called `install_attachment_point.sh` needs at least the four VPN credential files for a given AP. It is invoked specifying the name of the AS.
 For the infrastructure APs it is convenient to copy all the credential files together with the installation script on each AP we want to install, run the script, and then delete the all these credentials and the script.

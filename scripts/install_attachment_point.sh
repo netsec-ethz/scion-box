@@ -77,7 +77,7 @@ declare -a vpn_files=("ca.crt"
                       "$asname.crt"
                       "$asname.key")
 declare -a updater_files=("../update_gen.py"
-                          "../scionLab.sh"
+                          "../updateGen.sh"
                           "../sub/util/local_config_util.py")
 declare -a service_files=("files/updateAS.service"
                           "files/updateAS.timer")
