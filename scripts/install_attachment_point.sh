@@ -144,14 +144,14 @@ printf "$ACC_PWD" > account_secret
 popd >/dev/null
 
 # copy and run update gen
+sudo systemctl stop "updateAS.timer" || true
+sudo systemctl stop "updateAS.service" || true
 cp "${updater_files[@]}" "$HOME/.local/bin/"
 for f in "${service_files[@]}"; do
     cp "$f" "$TMPFILE"
     sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
     sudo cp "$TMPFILE" "/etc/systemd/system/$(basename $f)"
 done
-sudo systemctl stop "updateAS.timer" || stop
-sudo systemctl stop "updateAS.service" || stop
 sudo systemctl daemon-reload
 sudo systemctl start "updateAS.service"
 sudo systemctl enable "updateAS.service"
