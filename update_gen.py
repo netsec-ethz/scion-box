@@ -203,7 +203,10 @@ def request_server(isdas_list, ack_json=None):
         content = resp.content.decode('utf-8')
         if resp.status_code != 200:
             return None, content
-        resp_dict = json.loads(content)
+        try:
+            resp_dict = json.loads(content)
+        except Exception as ex:
+            return None, "Error while parsing JSON: %s : %s\nContent was: %s" % (type(ex),str(ex), content,)
         print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
 
