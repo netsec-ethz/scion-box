@@ -187,7 +187,9 @@ def request_server(isdas_list, ack_json=None):
     if ack_json:
         url = SCION_COORD_URL + "/" + POST_REQ + "/" + ACC_ID + "/" + ACC_PW
         try:
-            resp = requests.post(url, json=ack_json)
+            while url:
+                resp = requests.post(url, json=ack_json, allow_redirects=False)
+                url = resp.next.url if resp.is_redirect and resp.next else None
         except requests.exceptions.ConnectionError as e:
             return None, e
         return None, None
