@@ -135,8 +135,7 @@ def update_local_gen():
             (CREATE, updated_ases[my_asid][CREATED]),
         ):
             if new_reqs[req_type]:
-                new_tp = update_topology(my_asid, new_reqs, req_type, ip_list, new_tp)
-                is_modified = True
+                new_tp, is_modified = update_topology(my_asid, new_reqs, req_type, ip_list, new_tp)
     if is_modified:
         generate_local_gen(my_asid, as_obj, new_tp)
         print("[INFO] Configuration changed. Acknowlege to the SCION-COORD server")
@@ -290,6 +289,7 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
     :param list res_list: list that stores results of successfully update
     :returns: the updated topology as dict
     """
+    success = False
     for req in reqs[req_type]:
         user = req['VPNUserID']
         as_id = req['ASID']
@@ -300,7 +300,6 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
         br_id = req['APBRID']
         br_name = _br_name_from_br_id(br_id, my_asid)
         if_id = str(br_id) # Always use the BR ID as IF ID
-        success = False
 
         if req_type == REMOVE:
             current_br = _get_br_from_as(as_id, tp['BorderRouters'])
@@ -328,7 +327,7 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
 
         if success:
             res_list.append(as_id)
-    return tp
+    return tp, success
 
 
 def _ccd_user(user):
