@@ -1,0 +1,12 @@
+[Unit]
+Description=Run SCION AS Update gen Definition every 10 minutes
+
+[Timer]
+OnUnitActiveSec=10m
+# coalesce with other timers in 1 sec (basically, don't coalesce):
+AccuracySec=1s
+# will start somewhen in [start, start+2m]:
+RandomizedDelaySec=2m
+
+[Install]
+WantedBy=multi-user.target

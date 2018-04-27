@@ -187,7 +187,9 @@ def request_server(isdas_list, ack_json=None):
     if ack_json:
         url = SCION_COORD_URL + "/" + POST_REQ + "/" + ACC_ID + "/" + ACC_PW
         try:
-            resp = requests.post(url, json=ack_json)
+            while url:
+                resp = requests.post(url, json=ack_json, allow_redirects=False)
+                url = resp.next.url if resp.is_redirect and resp.next else None
         except requests.exceptions.ConnectionError as e:
             return None, e
         return None, None
@@ -203,7 +205,10 @@ def request_server(isdas_list, ack_json=None):
         content = resp.content.decode('utf-8')
         if resp.status_code != 200:
             return None, content
-        resp_dict = json.loads(content)
+        try:
+            resp_dict = json.loads(content)
+        except Exception as ex:
+            return None, "Error while parsing JSON: %s : %s\nContent was: %s" % (type(ex),str(ex), content,)
         print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
 
@@ -518,11 +523,12 @@ def generate_local_gen(my_asid, as_obj, tp):
 
 def _restart_scion():
     scion_command = "./scion.sh"
-    supervisord_command = os.path.expanduser("~/.local/bin/supervisorctl")
+    supervisor_command = "./supervisor/supervisor.sh"
 
     os.chdir(PROJECT_ROOT)
     call([scion_command, "stop"])
-    call([supervisord_command, "-c", "supervisor/supervisord.conf", "shutdown"])
+    call([supervisor_command, "shutdown"])
+    call([supervisor_command, "reload"])
     call([scion_command, "run"])
 
 def parse_command_line_args():
