@@ -80,6 +80,11 @@ CREATE = 'Create'
 REMOVED = 'Removed'
 UPDATED = 'Updated'
 CREATED = 'Created'
+effects = {
+    REMOVE: REMOVED,
+    UPDATE: UPDATED,
+    CREATE: CREATED,
+}
 #: API calls at the coordinator
 GET_REQ = "api/as/getUpdatesForAP"
 POST_REQ = "api/as/confirmUpdatesFromAP"
@@ -110,7 +115,7 @@ def update_local_gen():
     The main function that updates the topology configurations
     """
 
-    is_modified = False
+    topo_has_changed = False
     updated_ases = {}
     original_topo = []
     isdas_list = _get_my_asid()
@@ -122,30 +127,31 @@ def update_local_gen():
     for my_asid, new_reqs in new_as_dict.items():
         if my_asid not in isdas_list:
             continue
-        as_obj, tp = load_topology(my_asid)
-        original_topo.append((my_asid, as_obj, tp))
-        new_tp = copy.deepcopy(tp)
         updated_ases[my_asid] = {}
         updated_ases[my_asid][CREATED] = []
         updated_ases[my_asid][UPDATED] = []
         updated_ases[my_asid][REMOVED] = []
-        for req_type, ip_list in (
-            (REMOVE, updated_ases[my_asid][REMOVED]),
-            (UPDATE, updated_ases[my_asid][UPDATED]),
-            (CREATE, updated_ases[my_asid][CREATED]),
-        ):
+
+        as_obj, tp = load_topology(my_asid)
+        original_topo.append((my_asid, as_obj, tp))
+        new_tp = copy.deepcopy(tp)
+
+        for req_type in (REMOVE, UPDATE, CREATE):
             if new_reqs[req_type]:
-                new_tp, is_modified = update_topology(my_asid, new_reqs, req_type, ip_list, new_tp)
-    if is_modified:
+                modifiedASes, topo_changed_now = update_topology(my_asid, new_reqs, req_type, new_tp)
+                updated_ases[my_asid][effects[req_type]].extend(modifiedASes)
+                topo_has_changed = topo_has_changed or topo_changed_now
+    if updated_ases:
         generate_local_gen(my_asid, as_obj, new_tp)
-        print("[INFO] Configuration changed. Acknowlege to the SCION-COORD server")
+        print("[INFO] Configuration changed. Acknowledge to the SCION-COORD server")
         _, err = request_server(isdas_list, ack_json=updated_ases)
         if err:
             print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % err)
             for my_asid, as_obj, old_tp in original_topo:
-                print("[INFO] Retrieving the original topology congiguration: %s" % my_asid)
+                print("[INFO] Retrieving the original topology configuration: %s" % my_asid)
                 generate_local_gen(my_asid, as_obj, old_tp)
             exit(1)
+    if topo_has_changed:
         print("[INFO] Restarting SCION")
         _restart_scion()
     else:
@@ -280,7 +286,7 @@ def _get_masterkey(conf_file):
     exit(1)
 
 
-def update_topology(my_asid, reqs, req_type, res_list, tp):
+def update_topology(my_asid, reqs, req_type, tp):
     """
     Update the topology by adding, updating and removing BRs as requested.
     :param ISD_AS my_asid: current AS number
@@ -289,8 +295,10 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
     :param list res_list: list that stores results of successfully update
     :returns: the updated topology as dict
     """
-    success = False
+    modifiedASes = []
+    topo_has_changed = False
     for req in reqs[req_type]:
+        success = False
         user = req['VPNUserID']
         as_id = req['ASID']
         as_ip = req['IP']
@@ -324,10 +332,10 @@ def update_topology(my_asid, reqs, req_type, res_list, tp):
             if is_vpn:
                 _configure_vpn_ip(user, as_ip)
             success = True
+        modifiedASes.append({"IA": as_id, "success": success})
+        topo_has_changed = topo_has_changed or success
 
-        if success:
-            res_list.append(as_id)
-    return tp, success
+    return modifiedASes, topo_has_changed
 
 
 def _ccd_user(user):
