@@ -116,6 +116,7 @@ def update_local_gen():
     """
 
     topo_has_changed = False
+    something_to_acknowledge = False
     updated_ases = {}
     original_topo = []
     isdas_list = _get_my_asid()
@@ -141,7 +142,8 @@ def update_local_gen():
                 modifiedASes, topo_changed_now = update_topology(my_asid, new_reqs, req_type, new_tp)
                 updated_ases[my_asid][effects[req_type]].extend(modifiedASes)
                 topo_has_changed = topo_has_changed or topo_changed_now
-    if updated_ases:
+                something_to_acknowledge = True
+    if something_to_acknowledge:
         generate_local_gen(my_asid, as_obj, new_tp)
         print("[INFO] Configuration changed. Acknowledge to the SCION-COORD server")
         _, err = request_server(isdas_list, ack_json=updated_ases)
