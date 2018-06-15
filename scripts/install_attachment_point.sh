@@ -6,9 +6,10 @@ set -e
 PORT=1194
 NETWORK="10.0.8.0"
 SUBNET="255.255.255.0"
-testing=0
+no_vpn=0
 
 thisdir="$(dirname $0)"
+cd "$thisdir"
 
 usage="$(basename $0) -i IA -a account_id -b account_secret [-p 1194] [-s 255.255.255.0]
 where:
@@ -18,7 +19,7 @@ where:
     -s Subnet       Subnet to configure the OpenVPN server. Defaults to 255.255.255.0
     -a account_id   Account ID
     -b ac._secret   Account secret
-    -t              Testing only. Skip VPN and systemd configurations."
+    -t              Don't install any VPN files, only update scripts and services."
 while getopts ":hi:p:n:s:a:b:t" opt; do
 case $opt in
     h)
@@ -45,7 +46,7 @@ case $opt in
         ACC_PWD="$OPTARG"
         ;;
     t)
-        testing=1
+        no_vpn=1
         ;;
     \?)
         echo "Invalid option: -$OPTARG" >&2
@@ -60,14 +61,9 @@ case $opt in
 esac
 done
 
-pip3 install -r "$thisdir/../requirements.txt"
+pip3 install --user -r "../requirements.txt"
 
-if [ "$testing" -eq 1 ]; then
-    echo "Only testing. Exiting."
-    exit 0
-fi
-
-if [ -z "$asname" ] || [ -z "$ACC_ID" ] || [ -z "$ACC_PWD" ]; then
+if [ "$no_vpn" -eq 0 ] && { [ -z "$asname" ] || [ -z "$ACC_ID" ] || [ -z "$ACC_PWD" ]; } then
     echo "$usage"
     exit 1
 fi
@@ -81,10 +77,13 @@ declare -a updater_files=("../update_gen.py"
                           "../sub/util/local_config_util.py")
 declare -a service_files=("files/updateAS.service"
                           "files/updateAS.timer")
-declare -a files=("${vpn_files[@]}"
-                  "server.conf"
-                  "${updater_files[@]}"
+declare -a files=("${updater_files[@]}"
                   "${service_files[@]}")
+
+if [ "$no_vpn" -eq 0 ]; then
+    files+=("${vpn_files[@]}"
+            "server.conf")
+fi
 
 missingFiles=()
 for f in "${files[@]}"; do
@@ -103,45 +102,46 @@ if [ ! -z "$missingFiles" ]; then
 fi
 
 # STEPS
-# (from https://help.ubuntu.com/lts/serverguide/openvpn.html)
-
-# install openvpn
-if ! dpkg-query -s openvpn &> /dev/null ; then
-    sudo apt-get install openvpn -y
-fi
-
-# copy server conf to /etc/openvpn/server.conf
 TMPFILE=$(mktemp)
-cp "server.conf" "$TMPFILE"
-sed -i -- "s/_PORT_/$PORT/g" "$TMPFILE"
+if [ "$no_vpn" -eq 0 ]; then
+    # (from https://help.ubuntu.com/lts/serverguide/openvpn.html)
+    # install openvpn
+    if ! dpkg-query -s openvpn &> /dev/null ; then
+        sudo apt-get install openvpn -y
+    fi
 
-sed -i -- "s/_ASNAME_/$asname/g" "$TMPFILE"
-sed -i -- "s/_NETWORK_/$NETWORK/g" "$TMPFILE"
-sed -i -- "s/_SUBNET_/$SUBNET/g" "$TMPFILE"
-sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
-sudo mv "$TMPFILE" "/etc/openvpn/server.conf"
+    # copy server conf to /etc/openvpn/server.conf
+    cp "server.conf" "$TMPFILE"
+    sed -i -- "s/_PORT_/$PORT/g" "$TMPFILE"
 
-# copy the 4 files from coordinator
-sudo cp "${vpn_files[@]}" "/etc/openvpn/"
-sudo chmod 600 "/etc/openvpn/$asname.key"
+    sed -i -- "s/_ASNAME_/$asname/g" "$TMPFILE"
+    sed -i -- "s/_NETWORK_/$NETWORK/g" "$TMPFILE"
+    sed -i -- "s/_SUBNET_/$SUBNET/g" "$TMPFILE"
+    sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
+    sudo mv "$TMPFILE" "/etc/openvpn/server.conf"
 
-# client configurations to get static IPs
-mkdir -p "$HOME/openvpn_ccd"
+    # copy the 4 files from coordinator
+    sudo cp "${vpn_files[@]}" "/etc/openvpn/"
+    sudo chmod 600 "/etc/openvpn/$asname.key"
 
-# uncomment /etc/sysctl.conf ipv4.ip_foward and restart sysctl
-sudo sed -i -- 's/^#.*net.ipv4.ip_forward=1\(.*\)$/net.ipv4.ip_forward=1\1/g' "/etc/sysctl.conf"
+    # client configurations to get static IPs
+    mkdir -p "$HOME/openvpn_ccd"
 
-# start service systemctl start openvpn@server
-sudo systemctl stop "openvpn@server" || true
-sudo systemctl start "openvpn@server"
-sudo systemctl enable "openvpn@server"
+    # uncomment /etc/sysctl.conf ipv4.ip_foward and restart sysctl
+    sudo sed -i -- 's/^#.*net.ipv4.ip_forward=1\(.*\)$/net.ipv4.ip_forward=1\1/g' "/etc/sysctl.conf"
 
-# create the three ia, account_secret account_id files under gen :
-pushd "$SC/gen" >/dev/null
-printf "$ia" > "ia"
-printf "$ACC_ID" > account_id
-printf "$ACC_PWD" > account_secret
-popd >/dev/null
+    # start service systemctl start openvpn@server
+    sudo systemctl stop "openvpn@server" || true
+    sudo systemctl start "openvpn@server"
+    sudo systemctl enable "openvpn@server"
+
+    # create the three ia, account_secret account_id files under gen :
+    pushd "$SC/gen" >/dev/null
+    printf "$ia" > "ia"
+    printf "$ACC_ID" > account_id
+    printf "$ACC_PWD" > account_secret
+    popd >/dev/null
+fi
 
 # copy and run update gen
 sudo systemctl stop "updateAS.timer" || true
@@ -153,7 +153,7 @@ for f in "${service_files[@]}"; do
     sudo cp "$TMPFILE" "/etc/systemd/system/$(basename $f)"
 done
 sudo systemctl daemon-reload
-sudo systemctl start "updateAS.service"
+sudo systemctl start "updateAS.service" || true
 sudo systemctl enable "updateAS.service"
 sudo systemctl start "updateAS.timer"
 sudo systemctl enable "updateAS.timer"
