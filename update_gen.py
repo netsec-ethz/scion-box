@@ -26,6 +26,7 @@ from shutil import rmtree
 from subprocess import call
 import yaml
 import argparse
+from lib.packet.scion_addr import ISD_AS
 
 
 # SCION
@@ -172,8 +173,12 @@ def _get_my_asid():
         depth = root[len(path) + len(os.path.sep):].count(os.path.sep)
         if depth == base_depth + 2 and 'gen/ISD' in root and 'AS' in root:
             token = root.split('/')
-            isdas = '%s-%s' % (token[-2][3:], token[-1][2:])
-            isdas_list.append(isdas)
+            isdas_str = '%s-%s' % (token[-2][3:], token[-1][2:])
+            try:
+                isdas = ISD_AS(isdas_str)
+            except:
+                isdas = isdas_str
+            isdas_list.append(str(isdas))
     if not isdas_list:
         print("[DEBUG] No ASes running on the machine.")
     else:
@@ -216,7 +221,7 @@ def request_server(isdas_list, ack_json=None):
             resp_dict = json.loads(content)
         except Exception as ex:
             return None, "Error while parsing JSON: %s : %s\nContent was: %s" % (type(ex),str(ex), content,)
-        print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
+        print("[DEBUG] Received New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
 
 
