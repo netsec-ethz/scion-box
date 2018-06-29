@@ -173,12 +173,8 @@ def _get_my_asid():
         depth = root[len(path) + len(os.path.sep):].count(os.path.sep)
         if depth == base_depth + 2 and 'gen/ISD' in root and 'AS' in root:
             token = root.split('/')
-            isdas_str = '%s-%s' % (token[-2][3:], token[-1][2:])
-            try:
-                isdas = ISD_AS(isdas_str)
-            except:
-                isdas = isdas_str
-            isdas_list.append(str(isdas))
+            isdas = '%s-%s' % (token[-2][3:], token[-1][2:])
+            isdas_list.append(isdas)
     if not isdas_list:
         print("[DEBUG] No ASes running on the machine.")
     else:
@@ -232,7 +228,8 @@ def load_topology(asid):
     :returns: keys, trc, cert and topology dictionary for the given AS
     """
     ia = ISD_AS(asid)
-    as_path = 'ISD%s/AS%s' % (ia[0], ia[1])
+    as_str = ia.as_file_fmt() if 'as_file_fmt' in dir(ia) else ia[1]
+    as_path = 'ISD%s/AS%s' % (ia[0], as_str)
     process_path = _get_process_path(os.path.join(PROJECT_ROOT, GEN_PATH, as_path))
     try:
         with open(os.path.join(process_path, 'topology.json')) as topo_file:
@@ -244,7 +241,7 @@ def load_topology(asid):
         with open(os.path.join(process_path, 'keys/as-decrypt.key')) as enc_file:
             enc_priv_key = enc_file.read()
         with open(os.path.join(process_path, 'certs/ISD%s-AS%s-V%s.crt' %
-                               (ia[0], ia[1], INITIAL_CERT_VERSION))) as cert_file:
+                               (ia[0], as_str, INITIAL_CERT_VERSION))) as cert_file:
             certificate = cert_file.read()
         with open(os.path.join(process_path, 'certs/ISD%s-V%s.trc' %
                                (ia[0], INITIAL_TRC_VERSION))) as trc_file:
@@ -467,7 +464,7 @@ def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                     "Addr": as_ip
                 },
                 "MTU": mtu,
-                "LinkType": "CHILD",
+                "LinkTo": "CHILD",
                 "Public": {
                     "L4Port": ap_port,
                     "Addr": intf_addr

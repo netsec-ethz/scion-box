@@ -387,7 +387,7 @@ def _add_br(new_neighbor, topo):
                     "Addr": neighbor_addr
                 },
                 "MTU": 1472,
-                "LinkType": linktype,
+                "LinkTo": linktype,
                 "Public": {
                     "L4Port": internal_port,
                     "Addr": ext_addr
