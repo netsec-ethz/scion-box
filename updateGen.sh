@@ -15,7 +15,7 @@ if [ -f "$SC/gen/account_secret" ]; then
     ACC_PW=$(cat $SC/gen/account_secret)
 fi
 IP_ADDR=$(hostname -I | awk '{print $1}')
-URL="https://scion-ad6.inf.ethz.ch"
+URL="https://www.scionlab.org"
 
 export PYTHONPATH=$SC:$SC/python:$BASE/sub/util/:$BASE
 while read -r IA; do

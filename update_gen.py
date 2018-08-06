@@ -26,6 +26,7 @@ from shutil import rmtree
 from subprocess import call
 import yaml
 import argparse
+from lib.packet.scion_addr import ISD_AS
 
 
 # SCION
@@ -216,7 +217,7 @@ def request_server(isdas_list, ack_json=None):
             resp_dict = json.loads(content)
         except Exception as ex:
             return None, "Error while parsing JSON: %s : %s\nContent was: %s" % (type(ex),str(ex), content,)
-        print("[DEBUG] Recieved New SCIONLab ASes: \n%s" % resp_dict)
+        print("[DEBUG] Received New SCIONLab ASes: \n%s" % resp_dict)
         return resp_dict, None
 
 
@@ -227,7 +228,8 @@ def load_topology(asid):
     :returns: keys, trc, cert and topology dictionary for the given AS
     """
     ia = ISD_AS(asid)
-    as_path = 'ISD%s/AS%s' % (ia[0], ia[1])
+    as_str = ia.as_file_fmt() if 'as_file_fmt' in dir(ia) else ia[1]
+    as_path = 'ISD%s/AS%s' % (ia[0], as_str)
     process_path = _get_process_path(os.path.join(PROJECT_ROOT, GEN_PATH, as_path))
     try:
         with open(os.path.join(process_path, 'topology.json')) as topo_file:
@@ -239,7 +241,7 @@ def load_topology(asid):
         with open(os.path.join(process_path, 'keys/as-decrypt.key')) as enc_file:
             enc_priv_key = enc_file.read()
         with open(os.path.join(process_path, 'certs/ISD%s-AS%s-V%s.crt' %
-                               (ia[0], ia[1], INITIAL_CERT_VERSION))) as cert_file:
+                               (ia[0], as_str, INITIAL_CERT_VERSION))) as cert_file:
             certificate = cert_file.read()
         with open(os.path.join(process_path, 'certs/ISD%s-V%s.trc' %
                                (ia[0], INITIAL_TRC_VERSION))) as trc_file:
@@ -462,7 +464,7 @@ def _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, tp)
                     "Addr": as_ip
                 },
                 "MTU": mtu,
-                "LinkType": "CHILD",
+                "LinkTo": "CHILD",
                 "Public": {
                     "L4Port": ap_port,
                     "Addr": intf_addr
