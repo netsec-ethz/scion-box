@@ -7,6 +7,7 @@ PORT=1194
 NETWORK="10.0.8.0"
 SUBNET="255.255.255.0"
 no_vpn=0
+inside_docker=0
 
 thisdir="$(dirname $0)"
 cd "$thisdir"
@@ -19,8 +20,9 @@ where:
     -s Subnet       Subnet to configure the OpenVPN server. Defaults to 255.255.255.0
     -a account_id   Account ID
     -b ac._secret   Account secret
-    -t              Don't install any VPN files, only update scripts and services."
-while getopts ":hi:p:n:s:a:b:t" opt; do
+    -t              Don't install any VPN files, only update scripts and services.
+    -d              Run inside a docker container."
+while getopts ":hi:p:n:s:a:b:td" opt; do
 case $opt in
     h)
         echo "$usage"
@@ -48,6 +50,9 @@ case $opt in
     t)
         no_vpn=1
         ;;
+    d)
+        inside_docker=1
+        ;;
     \?)
         echo "Invalid option: -$OPTARG" >&2
         echo "$usage" >&2
@@ -60,6 +65,9 @@ case $opt in
         ;;
 esac
 done
+if [ $inside_docker -eq 1 ]; then
+    no_vpn=1
+fi
 
 pip3 install --user -r "../requirements.txt"
 
@@ -77,9 +85,11 @@ declare -a updater_files=("../update_gen.py"
                           "../sub/util/local_config_util.py")
 declare -a service_files=("files/updateAS.service"
                           "files/updateAS.timer")
-declare -a files=("${updater_files[@]}"
-                  "${service_files[@]}")
+declare -a files=("${updater_files[@]}")
 
+if [ $inside_docker -eq 0 ]; then
+    files+=("${service_files[@]}")
+fi
 if [ "$no_vpn" -eq 0 ]; then
     files+=("${vpn_files[@]}"
             "server.conf")
@@ -144,18 +154,20 @@ if [ "$no_vpn" -eq 0 ]; then
 fi
 
 # copy and run update gen
-sudo systemctl stop "updateAS.timer" || true
-sudo systemctl stop "updateAS.service" || true
 cp "${updater_files[@]}" "$HOME/.local/bin/"
-for f in "${service_files[@]}"; do
-    cp "$f" "$TMPFILE"
-    sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
-    sudo cp "$TMPFILE" "/etc/systemd/system/$(basename $f)"
-done
-sudo systemctl daemon-reload
-sudo systemctl start "updateAS.service" || true
-sudo systemctl enable "updateAS.service"
-sudo systemctl start "updateAS.timer"
-sudo systemctl enable "updateAS.timer"
+if [ $inside_docker -eq 0 ]; then
+    sudo systemctl stop "updateAS.timer" || true
+    sudo systemctl stop "updateAS.service" || true
+    for f in "${service_files[@]}"; do
+        cp "$f" "$TMPFILE"
+        sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
+        sudo cp "$TMPFILE" "/etc/systemd/system/$(basename $f)"
+    done
+    sudo systemctl daemon-reload
+    sudo systemctl start "updateAS.service" || true
+    sudo systemctl enable "updateAS.service"
+    sudo systemctl start "updateAS.timer"
+    sudo systemctl enable "updateAS.timer"
+fi
 
 echo "Done."
