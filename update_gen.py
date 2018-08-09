@@ -121,10 +121,7 @@ def update_local_gen():
     updated_ases = {}
     original_topo = []
     isdas_list = _get_my_asid()
-    new_as_dict, err = request_server(isdas_list)
-    if err:
-        print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % err)
-        exit(1)
+    new_as_dict = request_server(isdas_list)
 
     for my_asid, new_reqs in new_as_dict.items():
         if my_asid not in isdas_list:
@@ -147,9 +144,10 @@ def update_local_gen():
     if something_to_acknowledge:
         generate_local_gen(my_asid, as_obj, new_tp)
         print("[INFO] Configuration changed. Acknowledge to the SCION-COORD server")
-        _, err = request_server(isdas_list, ack_json=updated_ases)
-        if err:
-            print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % err)
+        try:
+            request_server(isdas_list, ack_json=updated_ases)
+        except Exception as ex:
+            print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % ex)
             for my_asid, as_obj, old_tp in original_topo:
                 print("[INFO] Retrieving the original topology configuration: %s" % my_asid)
                 generate_local_gen(my_asid, as_obj, old_tp)
@@ -181,6 +179,21 @@ def _get_my_asid():
         print("[DEBUG] ASes running on the machine: \n\t%s" % isdas_list)
     return isdas_list
 
+def send_request_and_get_json(url):
+    """
+    :returns dict json_response
+    """
+    resp = requests.get(url)
+    content = resp.content.decode('utf-8')
+    if resp.status_code == 204:
+        return {}
+    elif resp.status_code != 200:
+        raise Exception("Status code ({}) not 200. Content is: {}".format(resp.status_code, content))
+    try:
+        resp_dict = json.loads(content)
+    except Exception as ex:
+        raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex),str(ex), content))
+    return resp_dict
 
 def request_server(isdas_list, ack_json=None):
     """
@@ -194,31 +207,16 @@ def request_server(isdas_list, ack_json=None):
     query = "scionLabAP="
     if ack_json:
         url = SCION_COORD_URL + "/" + POST_REQ + "/" + ACC_ID + "/" + ACC_PW
-        try:
-            while url:
-                resp = requests.post(url, json=ack_json, allow_redirects=False)
-                url = resp.next.url if resp.is_redirect and resp.next else None
-        except requests.exceptions.ConnectionError as e:
-            return None, e
-        return None, None
+        while url:
+            resp = requests.post(url, json=ack_json, allow_redirects=False)
+            url = resp.next.url if resp.is_redirect and resp.next else None
+        return None
     else:
         url = SCION_COORD_URL + "/" + GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
         # AT this moment, we only support one AS for a machine
         my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
         url += my_asid
-        try:
-            resp = requests.get(url)
-        except requests.exceptions.ConnectionError as e:
-            return None, e
-        content = resp.content.decode('utf-8')
-        if resp.status_code != 200:
-            return None, content
-        try:
-            resp_dict = json.loads(content)
-        except Exception as ex:
-            return None, "Error while parsing JSON: %s : %s\nContent was: %s" % (type(ex),str(ex), content,)
-        print("[DEBUG] Received New SCIONLab ASes: \n%s" % resp_dict)
-        return resp_dict, None
+        return send_request_and_get_json(url)
 
 
 def load_topology(asid):
@@ -294,10 +292,10 @@ def update_topology(my_asid, reqs, req_type, tp):
     """
     Update the topology by adding, updating and removing BRs as requested.
     :param ISD_AS my_asid: current AS number
-    :param dict requests: requested entities to be changed from current topology
+    :param dict reqs: requested entities to be changed from current topology
     :param str req_type: type of requested changes
-    :param list res_list: list that stores results of successfully update
-    :returns: the updated topology as dict
+    :param dict tp: in/out existing topology / updated topology
+    :returns: modified user ASes and boolean indicating if topology is now different
     """
     modifiedASes = []
     topo_has_changed = False
