@@ -88,8 +88,25 @@ effects = {
 }
 #: API calls at the coordinator
 GET_REQ = "api/as/getUpdatesForAP"
+GETFULL_REQ = "api/as/getConnectionsForAP"
 POST_REQ = "api/as/confirmUpdatesFromAP"
 ONLY_AS_TO_UPDATE = None
+
+
+def dict_equal(dict1, dict2):
+    keys1 = dict1.keys()
+    keys2 = dict2.keys()
+    if keys1 ^ keys2:
+        return False
+    # same keys; what about the values?
+    for k, v1 in dict1.items():
+        v2 = dict2[k]
+        if isinstance(v1, dict) and isinstance(v2, dict) and not dict_equal(v1, v2):
+            return False
+        elif v1 != v2:
+            return False
+    return True
+
 
 # Template for new_as_dict
 # new_as_dict = {
@@ -109,6 +126,66 @@ ONLY_AS_TO_UPDATE = None
 #         'Remove': []
 #     }
 # }
+def fullsync_local_gen():
+    """
+    Replaces the topology with the one indicated by the Coordinator
+    """
+    topo_has_changed = False
+    something_to_acknowledge = {}
+    isdas_list = _get_my_asid()
+    fullsynced = request_server_fullsync(isdas_list)
+    for my_asid, status in fullsynced.items():
+        if my_asid not in isdas_list:
+            continue
+        connections = status['connections']
+
+        as_obj, tp = load_topology(my_asid)
+        new_tp = copy.deepcopy(tp)
+        brs = new_tp['BorderRouters']
+        # remove all child border routers to user ASes in this AP
+        for brname in list(brs.keys()): # list() because we del()
+            br = brs[brname]
+            for ifnum in list(br['Interfaces'].keys()):
+                iface = br['Interfaces'][ifnum]
+                ia = ISD_AS(iface['ISD_AS'])
+                asid = ia[1]
+                # if the link is to a child and that child is a user AS
+                if asid >= 0xffaa00010000 and iface['LinkTo'] == 'CHILD':
+                    del br['Interfaces'][ifnum]
+            if not br['Interfaces']: # no interfaces left -> remove BR
+                del brs[brname]
+        # add the links from the Coordinator
+        for conn in connections:
+            user = conn['VPNUserID']
+            as_id = conn['ASID']
+            as_ip = conn['IP']
+            is_vpn = conn['IsVPN']
+            ap_port = conn['APPort']
+            as_port = conn['UserPort']
+            br_id = conn['APBRID']
+            br_name = _br_name_from_br_id(br_id, my_asid)
+            if_id = str(br_id) # Always use the BR ID as IF ID
+            new_tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, new_tp)
+            if is_vpn:
+                _configure_vpn_ip(user, as_ip)
+        something_to_acknowledge[my_asid] = status
+        topo_has_changed = topo_has_changed or not dict_equal(tp['BorderRouters'], brs)
+
+    if topo_has_changed:
+        generate_local_gen(my_asid, as_obj, new_tp)
+    if something_to_acknowledge:
+        print("[INFO] Configuration received and processed. Acknowledge to the SCION-COORD server")
+        try:
+            ack_message = something_to_acknowledge
+            replay_server_fullsync(isdas_list, ack_message)
+        except Exception as ex:
+            print("[ERROR] Failed to ACK the fullsync to the Coordinator: \n{}".format(ex))
+
+    if topo_has_changed:
+        print("[INFO] Configuration has changed. Restarting SCION")
+        _restart_scion()
+    else:
+        print("[INFO] Nothing changed. Not restarting SCION")
 
 
 def update_local_gen():
@@ -218,6 +295,15 @@ def request_server(isdas_list, ack_json=None):
         url += my_asid
         return send_request_and_get_json(url)
 
+def request_server_fullsync(isdas_list):
+    url = SCION_COORD_URL + "/" + GETFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + "?scionLabAP="
+    # AT this moment, we only support one AS for a machine
+    my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
+    url += my_asid
+    return send_request_and_get_json(url)
+
+def replay_server_fullsync(isdas_list, ack_message):
+    pass
 
 def load_topology(asid):
     """
@@ -555,6 +641,8 @@ def parse_command_line_args():
                         help="The secret for the SCION Coordinator account that has permission to access this AS")
     parser.add_argument("--updateAS", nargs="?", type=str, metavar="IA, e.g. 1-12",
                         help="The AS to update. If not specified, the first one from the existing ones will be updated")
+    parser.add_argument("--fullsync", action="store_true",
+                        help="Generate IPv6 addresses")
 
     # The required arguments will be present, or parse_args will exit the application
     args = parser.parse_args()
@@ -570,12 +658,16 @@ def parse_command_line_args():
     ACC_PW = args.secret
     # If set, that is the AS to be updated, instead of the first one from the list of running ASes
     ONLY_AS_TO_UPDATE = args.updateAS
+    return args
 
 def main():
-    parse_command_line_args()
+    args = parse_command_line_args()
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
-    update_local_gen()
+    if args.fullsync:
+        fullsync_local_gen()
+    else:
+        update_local_gen()
 
 
 if __name__ == '__main__':
