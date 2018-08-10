@@ -188,7 +188,7 @@ def fullsync_local_gen():
         print("[INFO] Nothing changed. Not restarting SCION")
 
 
-def update_local_gen():
+def deltasync_local_gen():
     """
     The main function that updates the topology configurations
     """
@@ -198,7 +198,7 @@ def update_local_gen():
     updated_ases = {}
     original_topo = []
     isdas_list = _get_my_asid()
-    new_as_dict = request_server(isdas_list)
+    new_as_dict = request_server_deltasync(isdas_list)
 
     for my_asid, new_reqs in new_as_dict.items():
         if my_asid not in isdas_list:
@@ -222,7 +222,7 @@ def update_local_gen():
         generate_local_gen(my_asid, as_obj, new_tp)
         print("[INFO] Configuration changed. Acknowledge to the SCION-COORD server")
         try:
-            request_server(isdas_list, ack_json=updated_ases)
+            request_server_deltasync(isdas_list, ack_json=updated_ases)
         except Exception as ex:
             print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % ex)
             for my_asid, as_obj, old_tp in original_topo:
@@ -272,7 +272,7 @@ def send_request_and_get_json(url):
         raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex),str(ex), content))
     return resp_dict
 
-def request_server(isdas_list, ack_json=None):
+def request_server_deltasync(isdas_list, ack_json=None):
     """
     Communicate with SCION coordination server over HTTPS.
     Send get and post requests in order to get newly joined SCIONLabAS's
@@ -303,7 +303,9 @@ def request_server_fullsync(isdas_list):
     return send_request_and_get_json(url)
 
 def replay_server_fullsync(isdas_list, ack_message):
+    # TODO
     pass
+
 
 def load_topology(asid):
     """
@@ -667,7 +669,7 @@ def main():
     if args.fullsync:
         fullsync_local_gen()
     else:
-        update_local_gen()
+        deltasync_local_gen()
 
 
 if __name__ == '__main__':
