@@ -135,6 +135,7 @@ def fullsync_local_gen():
     isdas_list = _get_my_asid()
     fullsynced = request_server_fullsync(isdas_list)
     for my_asid, status in fullsynced.items():
+        print("[DEBUG] Fullsync for {} is: {}".format(my_asid, status))
         if my_asid not in isdas_list:
             continue
         connections = status['connections']
@@ -156,13 +157,13 @@ def fullsync_local_gen():
                 del brs[brname]
         # add the links from the Coordinator
         for conn in connections:
-            user = conn['VPNUserID']
             as_id = conn['ASID']
-            as_ip = conn['IP']
-            is_vpn = conn['IsVPN']
-            ap_port = conn['APPort']
+            as_ip = conn['UserIP']
             as_port = conn['UserPort']
+            ap_port = conn['APPort']
             br_id = conn['APBRID']
+            is_vpn = conn['IsVPN']
+            user = conn['VPNUserID']
             br_name = _br_name_from_br_id(br_id, my_asid)
             if_id = str(br_id) # Always use the BR ID as IF ID
             new_tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, new_tp)
@@ -391,7 +392,7 @@ def update_topology(my_asid, reqs, req_type, tp):
         success = False
         user = req['VPNUserID']
         as_id = req['ASID']
-        as_ip = req['IP']
+        as_ip = req['UserIP']
         is_vpn = req['IsVPN']
         ap_port = req['APPort']
         as_port = req['UserPort']
