@@ -179,9 +179,10 @@ def fullsync_local_gen(utc_time_delta):
     print("[INFO] Configuration received and processed. Acknowledge to the SCION-COORD server? {} , with this content: {}".format(bool(ack_to_coordinator_message), ack_to_coordinator_message))
     if ack_to_coordinator_message:
         try:
-            replay_server_fullsync(ack_to_coordinator_message, utc_time_delta)
+            response = replay_server_fullsync(ack_to_coordinator_message, utc_time_delta)
         except Exception as ex:
             print("[ERROR] Failed to ACK the fullsync to the Coordinator: \n{}".format(ex))
+        print("[DEBUG] Response from Coordinator to our status: {}".format(response))
 
     if topo_has_changed:
         print("[INFO] Configuration has changed. Restarting SCION")
@@ -276,7 +277,7 @@ def send_request_and_get_json(url):
     try:
         resp_dict = json.loads(content)
     except Exception as ex:
-        raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex),str(ex), content))
+        raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex), str(ex), content))
     return resp_dict
 
 def request_server_deltasync(isdas_list, ack_json=None):
@@ -315,7 +316,12 @@ def replay_server_fullsync(ack_message, utc_time_delta):
     while url:
         resp = requests.post(url, json=ack_message, allow_redirects=False)
         url = resp.next.url if resp.is_redirect and resp.next else None
-    return None
+    content = resp.content.decode("utf-8")
+    try:
+        resp_dict = json.loads(content)
+    except Exception as ex:
+        raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex), str(ex), content))
+    return resp_dict
 
 
 def load_topology(asid):
@@ -675,6 +681,7 @@ def parse_command_line_args():
 
 def main():
     args = parse_command_line_args()
+    print("[DEBUG] update_gen --------------------------------------- START -------------------------------------")
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
     if args.fullsync:
@@ -682,6 +689,7 @@ def main():
         fullsync_local_gen(utc_time_delta)
     else:
         deltasync_local_gen()
+    print("[DEBUG] update_gen --------------------------------------- END ---------------------------------------")
 
 
 if __name__ == '__main__':
