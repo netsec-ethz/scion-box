@@ -20,6 +20,6 @@ URL="https://www.scionlab.org"
 export PYTHONPATH=$SC:$SC/python:$BASE/sub/util/:$BASE
 while read -r IA; do
     echo "Updating AP for IA: $IA ..."
-    python3 $BASE/update_gen.py --url "$URL" --updateAS "$IA" --accountId "$ACC_ID" --secret "$ACC_PW" --address "$IP_ADDR" $*
+    python3 $BASE/update_gen.py --url "$URL" --updateAS "$IA" --accountId "$ACC_ID" --secret "$ACC_PW" --address "$IP_ADDR" --fullsync $*
 done <<< "$IAS"
 echo "Done updating AP."
