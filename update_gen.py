@@ -26,6 +26,7 @@ from shutil import rmtree
 from subprocess import call
 import yaml
 import argparse
+import time
 from lib.packet.scion_addr import ISD_AS
 
 
@@ -90,6 +91,7 @@ effects = {
 GET_REQ = "api/as/getUpdatesForAP"
 GETFULL_REQ = "api/as/getConnectionsForAP"
 POST_REQ = "api/as/confirmUpdatesFromAP"
+POSTFULL_REQ = "api/as/setConnectionsForAP"
 ONLY_AS_TO_UPDATE = None
 
 
@@ -126,16 +128,16 @@ def dict_equal(dict1, dict2):
 #         'Remove': []
 #     }
 # }
-def fullsync_local_gen():
+def fullsync_local_gen(utc_time_delta):
     """
     Replaces the topology with the one indicated by the Coordinator
     """
     topo_has_changed = False
-    something_to_acknowledge = {}
+    ack_to_coordinator_message = {}
     isdas_list = _get_my_asid()
-    fullsynced = request_server_fullsync(isdas_list)
+    fullsynced = request_server_fullsync(isdas_list, utc_time_delta)
+    print("[DEBUG] fullsync received: {}".format(fullsynced))
     for my_asid, status in fullsynced.items():
-        print("[DEBUG] Fullsync for {} is: {}".format(my_asid, status))
         if my_asid not in isdas_list:
             continue
         connections = status['connections']
@@ -169,16 +171,15 @@ def fullsync_local_gen():
             new_tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, new_tp)
             if is_vpn:
                 _configure_vpn_ip(user, as_ip)
-        something_to_acknowledge[my_asid] = status
+        ack_to_coordinator_message[my_asid] = status
         topo_has_changed = topo_has_changed or not dict_equal(tp['BorderRouters'], brs)
 
     if topo_has_changed:
         generate_local_gen(my_asid, as_obj, new_tp)
-    if something_to_acknowledge:
-        print("[INFO] Configuration received and processed. Acknowledge to the SCION-COORD server")
+    print("[INFO] Configuration received and processed. Acknowledge to the SCION-COORD server? {} , with this content: {}".format(bool(ack_to_coordinator_message), ack_to_coordinator_message))
+    if ack_to_coordinator_message:
         try:
-            ack_message = something_to_acknowledge
-            replay_server_fullsync(isdas_list, ack_message)
+            replay_server_fullsync(ack_to_coordinator_message, utc_time_delta)
         except Exception as ex:
             print("[ERROR] Failed to ACK the fullsync to the Coordinator: \n{}".format(ex))
 
@@ -261,7 +262,12 @@ def send_request_and_get_json(url):
     """
     :returns dict json_response
     """
-    resp = requests.get(url)
+    print("[DEBUG] requesting Coordinator with: {}".format(url))
+    try:
+        resp = requests.get(url)
+    except requests.exceptions.ConnectionError as ex:
+        print(str(ex))
+        exit(1)
     content = resp.content.decode('utf-8')
     if resp.status_code == 204:
         return {}
@@ -296,16 +302,20 @@ def request_server_deltasync(isdas_list, ack_json=None):
         url += my_asid
         return send_request_and_get_json(url)
 
-def request_server_fullsync(isdas_list):
-    url = SCION_COORD_URL + "/" + GETFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + "?scionLabAP="
-    # AT this moment, we only support one AS for a machine
+def request_server_fullsync(isdas_list, utc_time_delta):
+    # at this moment, we only support one AS for a machine
     my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
-    url += my_asid
+    url = SCION_COORD_URL + "/" + GETFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + \
+        "?scionLabAP={}&utcTimeDelta={}".format(my_asid, utc_time_delta)
     return send_request_and_get_json(url)
 
-def replay_server_fullsync(isdas_list, ack_message):
-    # TODO
-    pass
+def replay_server_fullsync(ack_message, utc_time_delta):
+    url = SCION_COORD_URL + "/" + POSTFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + \
+        "?utcTimeDelta={}".format(utc_time_delta)
+    while url:
+        resp = requests.post(url, json=ack_message, allow_redirects=False)
+        url = resp.next.url if resp.is_redirect and resp.next else None
+    return None
 
 
 def load_topology(asid):
@@ -668,7 +678,8 @@ def main():
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
     if args.fullsync:
-        fullsync_local_gen()
+        utc_time_delta = int(time.time())
+        fullsync_local_gen(utc_time_delta)
     else:
         deltasync_local_gen()
 
