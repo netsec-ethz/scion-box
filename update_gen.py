@@ -141,6 +141,8 @@ def fullsync_local_gen(utc_time_delta):
         if my_asid not in isdas_list:
             continue
         connections = status['connections']
+        if connections is None:
+            connections = []
 
         as_obj, tp = load_topology(my_asid)
         new_tp = copy.deepcopy(tp)
@@ -158,7 +160,9 @@ def fullsync_local_gen(utc_time_delta):
             if not br['Interfaces']: # no interfaces left -> remove BR
                 del brs[brname]
         # add the links from the Coordinator
-        for conn in connections:
+        skipped = []
+        for i in range(len(connections)):
+            conn = connections[i]
             as_id = conn['ASID']
             as_ip = conn['UserIP']
             as_port = conn['UserPort']
@@ -168,9 +172,18 @@ def fullsync_local_gen(utc_time_delta):
             user = conn['VPNUserID']
             br_name = _br_name_from_br_id(br_id, my_asid)
             if_id = str(br_id) # Always use the BR ID as IF ID
+            # refuse to update if infrastructure BRID or already existent:
+            if br_id <= 10 or br_name in new_tp['BorderRouters']:
+                skipped.append(i)
+                continue
             new_tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, new_tp)
             if is_vpn:
                 _configure_vpn_ip(user, as_ip)
+        skipped = set(skipped)
+        if skipped:
+            print("********************************* ERROR *************************")
+            print("Refuse to update the topology with a BRID of {}. Too dangerous. Skipped connections are: {}".format(br_id, [connections[i] for i in skipped]))
+        connections[:] = [connections[i] for i in range(len(connections)) if i not in skipped]
         ack_to_coordinator_message[my_asid] = status
         topo_has_changed = topo_has_changed or not dict_equal(tp['BorderRouters'], brs)
 
@@ -182,6 +195,11 @@ def fullsync_local_gen(utc_time_delta):
             response = replay_server_fullsync(ack_to_coordinator_message, utc_time_delta)
         except Exception as ex:
             print("[ERROR] Failed to ACK the fullsync to the Coordinator: \n{}".format(ex))
+        if response and not dict_equal(response, ack_to_coordinator_message):
+            print("***************************************************************")
+            print("***************************** ERROR ***************************")
+            print("***************************************************************")
+            print("Looks like the Coordinator differs in what the truth is. Please check here and Coordinator.")
         print("[DEBUG] Response from Coordinator to our status: {}".format(response))
 
     if topo_has_changed:

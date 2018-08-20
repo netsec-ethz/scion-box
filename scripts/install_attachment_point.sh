@@ -19,7 +19,7 @@ where:
     -n Net          Network for the OpenVPN server. Defaults to 10.0.8.0
     -s Subnet       Subnet to configure the OpenVPN server. Defaults to 255.255.255.0
     -a account_id   Account ID
-    -b ac._secret   Account secret
+    -b acc_secret   Account secret
     -t              Don't install any VPN files, only update scripts and services.
     -d              Run inside a docker container."
 while getopts ":hi:p:n:s:a:b:td" opt; do
