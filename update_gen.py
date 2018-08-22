@@ -109,6 +109,8 @@ def dict_equal(dict1, dict2):
             return False
     return True
 
+def asid_is_infrastructure(asid):
+    return asid > 0xffaa00000000 and asid < 0xffaa00010000
 
 # Template for new_as_dict
 # new_as_dict = {
@@ -155,11 +157,12 @@ def fullsync_local_gen(utc_time_delta):
                 ia = ISD_AS(iface['ISD_AS'])
                 asid = ia[1]
                 # if the link is to a child and that child is a user AS
-                if asid >= 0xffaa00010000 and iface['LinkTo'] == 'CHILD':
+                if not asid_is_infrastructure(asid) and iface['LinkTo'] == 'CHILD':
                     del br['Interfaces'][ifnum]
             if not br['Interfaces']: # no interfaces left -> remove BR
                 del brs[brname]
         # add the links from the Coordinator
+        print("[DEBUG] Existing ({}) BRs: {}".format(len(new_tp['BorderRouters']), new_tp['BorderRouters']))
         skipped = []
         for i in range(len(connections)):
             conn = connections[i]
@@ -182,7 +185,7 @@ def fullsync_local_gen(utc_time_delta):
         skipped = set(skipped)
         if skipped:
             print("********************************* ERROR *************************")
-            print("Refuse to update the topology with a BRID of {}. Too dangerous. Skipped connections are: {}".format(br_id, [connections[i] for i in skipped]))
+            print("Refuse to update the topology with certain BRs. Too dangerous. Skipped connections are: {}".format([connections[i] for i in skipped]))
         connections[:] = [connections[i] for i in range(len(connections)) if i not in skipped]
         ack_to_coordinator_message[my_asid] = status
         topo_has_changed = topo_has_changed or not dict_equal(tp['BorderRouters'], brs)
