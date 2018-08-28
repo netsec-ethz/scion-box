@@ -95,20 +95,6 @@ POSTFULL_REQ = "api/as/setConnectionsForAP"
 ONLY_AS_TO_UPDATE = None
 
 
-def dict_equal(dict1, dict2):
-    keys1 = dict1.keys()
-    keys2 = dict2.keys()
-    if keys1 ^ keys2:
-        return False
-    # same keys; what about the values?
-    for k, v1 in dict1.items():
-        v2 = dict2[k]
-        if isinstance(v1, dict) and isinstance(v2, dict) and not dict_equal(v1, v2):
-            return False
-        elif v1 != v2:
-            return False
-    return True
-
 def asid_is_infrastructure(asid):
     return asid > 0xffaa00000000 and asid < 0xffaa00010000
 
@@ -188,17 +174,17 @@ def fullsync_local_gen(utc_time_delta):
             print("Refuse to update the topology with certain BRs. Too dangerous. Skipped connections are: {}".format([connections[i] for i in skipped]))
         connections[:] = [connections[i] for i in range(len(connections)) if i not in skipped]
         ack_to_coordinator_message[my_asid] = status
-        topo_has_changed = topo_has_changed or not dict_equal(tp['BorderRouters'], brs)
+        topo_has_changed = topo_has_changed or tp['BorderRouters'] != brs
 
     if topo_has_changed:
         generate_local_gen(my_asid, as_obj, new_tp)
     print("[INFO] Configuration received and processed. Acknowledge to the SCION-COORD server? {} , with this content: {}".format(bool(ack_to_coordinator_message), ack_to_coordinator_message))
     if ack_to_coordinator_message:
         try:
-            response = replay_server_fullsync(ack_to_coordinator_message, utc_time_delta)
+            response = reply_server_fullsync(ack_to_coordinator_message, utc_time_delta)
         except Exception as ex:
             print("[ERROR] Failed to ACK the fullsync to the Coordinator: \n{}".format(ex))
-        if response and not dict_equal(response, ack_to_coordinator_message):
+        if response and response != ack_to_coordinator_message:
             print("***************************************************************")
             print("***************************** ERROR ***************************")
             print("***************************************************************")
@@ -325,13 +311,25 @@ def request_server_deltasync(isdas_list, ack_json=None):
         return send_request_and_get_json(url)
 
 def request_server_fullsync(isdas_list, utc_time_delta):
+    """
+    Ask the Coordinator the full list of connections for a given list of APs.abs
+    :param list isdas_list: list of AP IAs
+    :param int utc_time_delta: seconds since Epoch
+    :returns dict response from Coordinator
+    """
     # at this moment, we only support one AS for a machine
     my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
     url = SCION_COORD_URL + "/" + GETFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + \
         "?scionLabAP={}&utcTimeDelta={}".format(my_asid, utc_time_delta)
     return send_request_and_get_json(url)
 
-def replay_server_fullsync(ack_message, utc_time_delta):
+def reply_server_fullsync(ack_message, utc_time_delta):
+    """
+    Confirm to the Coordinator the current accepted list of connections for a list of APs.
+    :param dict ack_message: message to send to the Coordinator.
+    :param int utc_time_delta: seconds since Epoch
+    :returns dict resp_dict: response from Coordinator.
+    """
     url = SCION_COORD_URL + "/" + POSTFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + \
         "?utcTimeDelta={}".format(utc_time_delta)
     while url:
