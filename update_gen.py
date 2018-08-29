@@ -26,6 +26,7 @@ from shutil import rmtree
 from subprocess import call
 import yaml
 import argparse
+import time
 from lib.packet.scion_addr import ISD_AS
 
 
@@ -88,8 +89,14 @@ effects = {
 }
 #: API calls at the coordinator
 GET_REQ = "api/as/getUpdatesForAP"
+GETFULL_REQ = "api/as/getConnectionsForAP"
 POST_REQ = "api/as/confirmUpdatesFromAP"
+POSTFULL_REQ = "api/as/setConnectionsForAP"
 ONLY_AS_TO_UPDATE = None
+
+
+def asid_is_infrastructure(asid):
+    return asid > 0xffaa00000000 and asid < 0xffaa00010000
 
 # Template for new_as_dict
 # new_as_dict = {
@@ -109,9 +116,89 @@ ONLY_AS_TO_UPDATE = None
 #         'Remove': []
 #     }
 # }
+def fullsync_local_gen(utc_time_delta):
+    """
+    Replaces the topology with the one indicated by the Coordinator
+    """
+    topo_has_changed = False
+    ack_to_coordinator_message = {}
+    isdas_list = _get_my_asid()
+    fullsynced = request_server_fullsync(isdas_list, utc_time_delta)
+    print("[DEBUG] fullsync received: {}".format(fullsynced))
+    for my_asid, status in fullsynced.items():
+        if my_asid not in isdas_list:
+            continue
+        connections = status['connections']
+        if connections is None:
+            connections = []
+
+        as_obj, tp = load_topology(my_asid)
+        new_tp = copy.deepcopy(tp)
+        brs = new_tp['BorderRouters']
+        # remove all child border routers to user ASes in this AP
+        for brname in list(brs.keys()): # list() because we del()
+            br = brs[brname]
+            for ifnum in list(br['Interfaces'].keys()):
+                iface = br['Interfaces'][ifnum]
+                ia = ISD_AS(iface['ISD_AS'])
+                asid = ia[1]
+                # if the link is to a child and that child is a user AS
+                if not asid_is_infrastructure(asid) and iface['LinkTo'] == 'CHILD':
+                    del br['Interfaces'][ifnum]
+            if not br['Interfaces']: # no interfaces left -> remove BR
+                del brs[brname]
+        # add the links from the Coordinator
+        print("[DEBUG] Existing ({}) BRs: {}".format(len(new_tp['BorderRouters']), new_tp['BorderRouters']))
+        skipped = []
+        for i in range(len(connections)):
+            conn = connections[i]
+            as_id = conn['ASID']
+            as_ip = conn['UserIP']
+            as_port = conn['UserPort']
+            ap_port = conn['APPort']
+            br_id = conn['APBRID']
+            is_vpn = conn['IsVPN']
+            user = conn['VPNUserID']
+            br_name = _br_name_from_br_id(br_id, my_asid)
+            if_id = str(br_id) # Always use the BR ID as IF ID
+            # refuse to update if infrastructure BRID or already existent:
+            if br_id <= 10 or br_name in new_tp['BorderRouters']:
+                skipped.append(i)
+                continue
+            new_tp = _create_topology(br_name, if_id, as_id, as_ip, as_port, ap_port, is_vpn, new_tp)
+            if is_vpn:
+                _configure_vpn_ip(user, as_ip)
+        skipped = set(skipped)
+        if skipped:
+            print("********************************* ERROR *************************")
+            print("Refuse to update the topology with certain BRs. Too dangerous. Skipped connections are: {}".format([connections[i] for i in skipped]))
+        connections[:] = [connections[i] for i in range(len(connections)) if i not in skipped]
+        ack_to_coordinator_message[my_asid] = status
+        topo_has_changed = topo_has_changed or tp['BorderRouters'] != brs
+
+    if topo_has_changed:
+        generate_local_gen(my_asid, as_obj, new_tp)
+    print("[INFO] Configuration received and processed. Acknowledge to the SCION-COORD server? {} , with this content: {}".format(bool(ack_to_coordinator_message), ack_to_coordinator_message))
+    if ack_to_coordinator_message:
+        try:
+            response = reply_server_fullsync(ack_to_coordinator_message, utc_time_delta)
+        except Exception as ex:
+            print("[ERROR] Failed to ACK the fullsync to the Coordinator: \n{}".format(ex))
+        if response and response != ack_to_coordinator_message:
+            print("***************************************************************")
+            print("***************************** ERROR ***************************")
+            print("***************************************************************")
+            print("Looks like the Coordinator differs in what the truth is. Please check here and Coordinator.")
+        print("[DEBUG] Response from Coordinator to our status: {}".format(response))
+
+    if topo_has_changed:
+        print("[INFO] Configuration has changed. Restarting SCION")
+        _restart_scion()
+    else:
+        print("[INFO] Nothing changed. Not restarting SCION")
 
 
-def update_local_gen():
+def deltasync_local_gen():
     """
     The main function that updates the topology configurations
     """
@@ -121,10 +208,7 @@ def update_local_gen():
     updated_ases = {}
     original_topo = []
     isdas_list = _get_my_asid()
-    new_as_dict, err = request_server(isdas_list)
-    if err:
-        print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % err)
-        exit(1)
+    new_as_dict = request_server_deltasync(isdas_list)
 
     for my_asid, new_reqs in new_as_dict.items():
         if my_asid not in isdas_list:
@@ -147,9 +231,10 @@ def update_local_gen():
     if something_to_acknowledge:
         generate_local_gen(my_asid, as_obj, new_tp)
         print("[INFO] Configuration changed. Acknowledge to the SCION-COORD server")
-        _, err = request_server(isdas_list, ack_json=updated_ases)
-        if err:
-            print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % err)
+        try:
+            request_server_deltasync(isdas_list, ack_json=updated_ases)
+        except Exception as ex:
+            print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % ex)
             for my_asid, as_obj, old_tp in original_topo:
                 print("[INFO] Retrieving the original topology configuration: %s" % my_asid)
                 generate_local_gen(my_asid, as_obj, old_tp)
@@ -181,8 +266,28 @@ def _get_my_asid():
         print("[DEBUG] ASes running on the machine: \n\t%s" % isdas_list)
     return isdas_list
 
+def send_request_and_get_json(url):
+    """
+    :returns dict json_response
+    """
+    print("[DEBUG] requesting Coordinator with: {}".format(url))
+    try:
+        resp = requests.get(url)
+    except requests.exceptions.ConnectionError as ex:
+        print(str(ex))
+        exit(1)
+    content = resp.content.decode('utf-8')
+    if resp.status_code == 204:
+        return {}
+    elif resp.status_code != 200:
+        raise Exception("Status code ({}) not 200. Content is: {}".format(resp.status_code, content))
+    try:
+        resp_dict = json.loads(content)
+    except Exception as ex:
+        raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex), str(ex), content))
+    return resp_dict
 
-def request_server(isdas_list, ack_json=None):
+def request_server_deltasync(isdas_list, ack_json=None):
     """
     Communicate with SCION coordination server over HTTPS.
     Send get and post requests in order to get newly joined SCIONLabAS's
@@ -194,31 +299,48 @@ def request_server(isdas_list, ack_json=None):
     query = "scionLabAP="
     if ack_json:
         url = SCION_COORD_URL + "/" + POST_REQ + "/" + ACC_ID + "/" + ACC_PW
-        try:
-            while url:
-                resp = requests.post(url, json=ack_json, allow_redirects=False)
-                url = resp.next.url if resp.is_redirect and resp.next else None
-        except requests.exceptions.ConnectionError as e:
-            return None, e
-        return None, None
+        while url:
+            resp = requests.post(url, json=ack_json, allow_redirects=False)
+            url = resp.next.url if resp.is_redirect and resp.next else None
+        return None
     else:
         url = SCION_COORD_URL + "/" + GET_REQ + "/" + ACC_ID + "/" + ACC_PW + "?" + query
         # AT this moment, we only support one AS for a machine
         my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
         url += my_asid
-        try:
-            resp = requests.get(url)
-        except requests.exceptions.ConnectionError as e:
-            return None, e
-        content = resp.content.decode('utf-8')
-        if resp.status_code != 200:
-            return None, content
-        try:
-            resp_dict = json.loads(content)
-        except Exception as ex:
-            return None, "Error while parsing JSON: %s : %s\nContent was: %s" % (type(ex),str(ex), content,)
-        print("[DEBUG] Received New SCIONLab ASes: \n%s" % resp_dict)
-        return resp_dict, None
+        return send_request_and_get_json(url)
+
+def request_server_fullsync(isdas_list, utc_time_delta):
+    """
+    Ask the Coordinator the full list of connections for a given list of APs.abs
+    :param list isdas_list: list of AP IAs
+    :param int utc_time_delta: seconds since Epoch
+    :returns dict response from Coordinator
+    """
+    # at this moment, we only support one AS for a machine
+    my_asid = ONLY_AS_TO_UPDATE if ONLY_AS_TO_UPDATE else isdas_list[0]
+    url = SCION_COORD_URL + "/" + GETFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + \
+        "?scionLabAP={}&utcTimeDelta={}".format(my_asid, utc_time_delta)
+    return send_request_and_get_json(url)
+
+def reply_server_fullsync(ack_message, utc_time_delta):
+    """
+    Confirm to the Coordinator the current accepted list of connections for a list of APs.
+    :param dict ack_message: message to send to the Coordinator.
+    :param int utc_time_delta: seconds since Epoch
+    :returns dict resp_dict: response from Coordinator.
+    """
+    url = SCION_COORD_URL + "/" + POSTFULL_REQ + "/" + ACC_ID + "/" + ACC_PW + \
+        "?utcTimeDelta={}".format(utc_time_delta)
+    while url:
+        resp = requests.post(url, json=ack_message, allow_redirects=False)
+        url = resp.next.url if resp.is_redirect and resp.next else None
+    content = resp.content.decode("utf-8")
+    try:
+        resp_dict = json.loads(content)
+    except Exception as ex:
+        raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex), str(ex), content))
+    return resp_dict
 
 
 def load_topology(asid):
@@ -294,10 +416,10 @@ def update_topology(my_asid, reqs, req_type, tp):
     """
     Update the topology by adding, updating and removing BRs as requested.
     :param ISD_AS my_asid: current AS number
-    :param dict requests: requested entities to be changed from current topology
+    :param dict reqs: requested entities to be changed from current topology
     :param str req_type: type of requested changes
-    :param list res_list: list that stores results of successfully update
-    :returns: the updated topology as dict
+    :param dict tp: in/out existing topology / updated topology
+    :returns: modified user ASes and boolean indicating if topology is now different
     """
     modifiedASes = []
     topo_has_changed = False
@@ -305,7 +427,7 @@ def update_topology(my_asid, reqs, req_type, tp):
         success = False
         user = req['VPNUserID']
         as_id = req['ASID']
-        as_ip = req['IP']
+        as_ip = req['UserIP']
         is_vpn = req['IsVPN']
         ap_port = req['APPort']
         as_port = req['UserPort']
@@ -557,6 +679,8 @@ def parse_command_line_args():
                         help="The secret for the SCION Coordinator account that has permission to access this AS")
     parser.add_argument("--updateAS", nargs="?", type=str, metavar="IA, e.g. 1-12",
                         help="The AS to update. If not specified, the first one from the existing ones will be updated")
+    parser.add_argument("--fullsync", action="store_true",
+                        help="Generate IPv6 addresses")
 
     # The required arguments will be present, or parse_args will exit the application
     args = parser.parse_args()
@@ -572,12 +696,19 @@ def parse_command_line_args():
     ACC_PW = args.secret
     # If set, that is the AS to be updated, instead of the first one from the list of running ASes
     ONLY_AS_TO_UPDATE = args.updateAS
+    return args
 
 def main():
-    parse_command_line_args()
+    args = parse_command_line_args()
+    print("[DEBUG] update_gen --------------------------------------- START -------------------------------------")
     if not os.path.exists(OPENVPN_CCD):
         os.makedirs(OPENVPN_CCD)
-    update_local_gen()
+    if args.fullsync:
+        utc_time_delta = int(time.time())
+        fullsync_local_gen(utc_time_delta)
+    else:
+        deltasync_local_gen()
+    print("[DEBUG] update_gen --------------------------------------- END ---------------------------------------")
 
 
 if __name__ == '__main__':
