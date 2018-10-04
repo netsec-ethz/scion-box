@@ -1,0 +1,24 @@
+{
+    "1-ff00_0_110": {
+        "connections": [
+            {
+                "ASID": "1-ff00:0:111",
+                "UserIP": "192.168.1.8",
+                "UserPort": 50000,
+                "APPort": 50021,
+                "APBRID": 72,
+                "IsVPN": false,
+                "VPNUserID": ""
+            },
+            {
+                "ASID": "1-ff00:0:112",
+                "UserIP": "192.168.1.9",
+                "UserPort": 50000,
+                "APPort": 50022,
+                "APBRID": 80,
+                "IsVPN": false,
+                "VPNUserID": ""
+            }
+        ]
+    }
+}

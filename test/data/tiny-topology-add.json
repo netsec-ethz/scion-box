@@ -1,0 +1,122 @@
+{
+  "ISD_AS": "1-ff00:0:110",
+  "BeaconService": {
+    "bs1-ff00_0_110-1": {
+      "Public": [
+        {
+          "L4Port": 30097,
+          "Addr": "127.0.0.11"
+        }
+      ]
+    }
+  },
+  "MTU": 1400,
+  "Core": true,
+  "PathService": {
+    "ps1-ff00_0_110-1": {
+      "Public": [
+        {
+          "L4Port": 30075,
+          "Addr": "127.0.0.13"
+        }
+      ]
+    }
+  },
+  "BorderRouters": {
+    "br1-ff00_0_110": {
+      "Interfaces": {
+        "72": {
+          "ISD_AS": "1-ff00:0:111",
+          "Remote": {
+            "L4Port": 50000,
+            "Addr": "192.168.1.8"
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Public": {
+            "L4Port": 50021,
+            "Addr": "127.0.0.4"
+          },
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Overlay": "UDP/IPv4"
+        },
+        "80": {
+          "ISD_AS": "1-ff00:0:112",
+          "Remote": {
+            "L4Port": 50000,
+            "Addr": "192.168.1.9"
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 1,
+          "Public": {
+            "L4Port": 50022,
+            "Addr": "127.0.0.4"
+          },
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Overlay": "UDP/IPv4"
+        },
+        "23": {
+          "ISD_AS": "1-ff00:0:113",
+          "Remote": {
+            "L4Port": 50000,
+            "Addr": "10.0.8.42"
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 2,
+          "Public": {
+            "L4Port": 50023,
+            "Addr": "10.0.8.1"
+          },
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Overlay": "UDP/IPv4"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "L4Port": 31121,
+              "Addr": "127.0.0.9"
+            }
+          ]
+        },
+        {
+          "Public": [
+            {
+              "L4Port": 31129,
+              "Addr": "127.0.0.9"
+            }
+          ]
+        },
+        {
+          "Public": [
+            {
+              "L4Port": 31072,
+              "Addr": "127.0.0.9"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "ZookeeperService": {
+    "1": {
+      "L4Port": 2181,
+      "Addr": "127.0.0.1"
+    }
+  },
+  "CertificateService": {
+    "cs1-ff00_0_110-1": {
+      "Public": [
+        {
+          "L4Port": 30074,
+          "Addr": "127.0.0.12"
+        }
+      ]
+    }
+  },
+  "Overlay": "UDP/IPv4"
+}

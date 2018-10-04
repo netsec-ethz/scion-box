@@ -1,0 +1,3614 @@
+{
+  "BeaconService": {
+    "bs17-ffaa_0_1107-1": {
+      "Public": [
+        {
+          "Addr": "192.33.93.195",
+          "L4Port": 31041
+        }
+      ]
+    }
+  },
+  "ISD_AS": "17-ffaa:0:1107",
+  "PathService": {
+    "ps17-ffaa_0_1107-1": {
+      "Public": [
+        {
+          "Addr": "192.33.93.195",
+          "L4Port": 31043
+        }
+      ]
+    }
+  },
+  "CertificateService": {
+    "cs17-ffaa_0_1107-1": {
+      "Public": [
+        {
+          "Addr": "192.33.93.195",
+          "L4Port": 31042
+        }
+      ]
+    }
+  },
+  "BorderRouters": {
+    "br17-ffaa_0_1107-84": {
+      "Interfaces": {
+        "84": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50083
+          },
+          "Remote": {
+            "Addr": "1.2.3.4",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1133"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31133
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-85": {
+      "Interfaces": {
+        "85": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50084
+          },
+          "Remote": {
+            "Addr": "18.194.144.135",
+            "L4Port": 50055
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:39"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31134
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-93": {
+      "Interfaces": {
+        "93": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50092
+          },
+          "Remote": {
+            "Addr": "10.0.8.66",
+            "L4Port": 49999
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-1098"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31142
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-106": {
+      "Interfaces": {
+        "106": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50105
+          },
+          "Remote": {
+            "Addr": "10.0.8.77",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:c2"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31155
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-40": {
+      "Interfaces": {
+        "40": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50039
+          },
+          "Remote": {
+            "Addr": "10.0.8.26",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:3b"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31089
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-89": {
+      "Interfaces": {
+        "89": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50088
+          },
+          "Remote": {
+            "Addr": "10.0.8.63",
+            "L4Port": 49999
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-1099"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31138
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-91": {
+      "Interfaces": {
+        "91": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50090
+          },
+          "Remote": {
+            "Addr": "10.0.8.65",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-1152"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31140
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-49": {
+      "Interfaces": {
+        "49": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50048
+          },
+          "Remote": {
+            "Addr": "192.168.1.1",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1071"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31098
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-66": {
+      "Interfaces": {
+        "66": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50065
+          },
+          "Remote": {
+            "Addr": "10.0.8.45",
+            "L4Port": 49999
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-1083"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31115
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-107": {
+      "Interfaces": {
+        "107": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50106
+          },
+          "Remote": {
+            "Addr": "10.0.8.78",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:bd"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31156
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-33": {
+      "Interfaces": {
+        "33": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50032
+          },
+          "Remote": {
+            "Addr": "10.0.8.3",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1035"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31082
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-18": {
+      "Interfaces": {
+        "18": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50017
+          },
+          "Remote": {
+            "Addr": "10.0.8.44",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:c3"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31067
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-125": {
+      "Interfaces": {
+        "125": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50124
+          },
+          "Remote": {
+            "Addr": "10.0.8.96",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:102"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31174
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-76": {
+      "Interfaces": {
+        "76": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50075
+          },
+          "Remote": {
+            "Addr": "10.0.8.54",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1117"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31125
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-100": {
+      "Interfaces": {
+        "100": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50099
+          },
+          "Remote": {
+            "Addr": "10.0.8.71",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-1092"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31149
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-120": {
+      "Interfaces": {
+        "120": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50119
+          },
+          "Remote": {
+            "Addr": "10.0.8.92",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:e1"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31169
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-68": {
+      "Interfaces": {
+        "68": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50067
+          },
+          "Remote": {
+            "Addr": "10.0.8.46",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1093"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31117
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-56": {
+      "Interfaces": {
+        "56": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50055
+          },
+          "Remote": {
+            "Addr": "128.237.153.248",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1077"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31105
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-87": {
+      "Interfaces": {
+        "87": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50086
+          },
+          "Remote": {
+            "Addr": "10.0.8.61",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:88"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31136
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-39": {
+      "Interfaces": {
+        "39": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50038
+          },
+          "Remote": {
+            "Addr": "10.0.8.28",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1020"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31088
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-32": {
+      "Interfaces": {
+        "32": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50031
+          },
+          "Remote": {
+            "Addr": "10.0.8.22",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1140"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31081
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-13": {
+      "Interfaces": {
+        "13": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50012
+          },
+          "Remote": {
+            "Addr": "10.0.8.11",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1004"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31062
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-15": {
+      "Interfaces": {
+        "15": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50014
+          },
+          "Remote": {
+            "Addr": "10.0.8.6",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:dd"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31064
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-36": {
+      "Interfaces": {
+        "36": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50035
+          },
+          "Remote": {
+            "Addr": "127.0.0.1",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1017"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31085
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-41": {
+      "Interfaces": {
+        "41": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50040
+          },
+          "Remote": {
+            "Addr": "10.0.8.58",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:d5"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31090
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-1": {
+      "Interfaces": {
+        "1": {
+          "LinkTo": "PARENT",
+          "Bandwidth": 1000,
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50000
+          },
+          "Remote": {
+            "Addr": "192.33.93.190",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "ISD_AS": "17-ffaa:0:1102",
+          "Overlay": "UDP/IPv4"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31045
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-47": {
+      "Interfaces": {
+        "47": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50046
+          },
+          "Remote": {
+            "Addr": "10.0.8.35",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:3e"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31096
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-31": {
+      "Interfaces": {
+        "31": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50030
+          },
+          "Remote": {
+            "Addr": "10.0.8.20",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31080
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-94": {
+      "Interfaces": {
+        "94": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50093
+          },
+          "Remote": {
+            "Addr": "10.0.8.67",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:13"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31143
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-71": {
+      "Interfaces": {
+        "71": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50070
+          },
+          "Remote": {
+            "Addr": "10.0.8.49",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1096"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31120
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-123": {
+      "Interfaces": {
+        "123": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50122
+          },
+          "Remote": {
+            "Addr": "10.0.8.94",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:ff"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31172
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-30": {
+      "Interfaces": {
+        "30": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50029
+          },
+          "Remote": {
+            "Addr": "10.0.8.21",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1147"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31079
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-98": {
+      "Interfaces": {
+        "98": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50097
+          },
+          "Remote": {
+            "Addr": "10.0.8.12",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:b8"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31147
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-34": {
+      "Interfaces": {
+        "34": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50033
+          },
+          "Remote": {
+            "Addr": "10.0.8.4",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1032"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31083
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-127": {
+      "Interfaces": {
+        "127": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50126
+          },
+          "Remote": {
+            "Addr": "10.0.8.98",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f2"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31176
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-50": {
+      "Interfaces": {
+        "50": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50049
+          },
+          "Remote": {
+            "Addr": "10.0.8.37",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1072"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31099
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-109": {
+      "Interfaces": {
+        "109": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50108
+          },
+          "Remote": {
+            "Addr": "10.0.8.80",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:a"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31158
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-101": {
+      "Interfaces": {
+        "101": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50100
+          },
+          "Remote": {
+            "Addr": "192.33.93.156",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:90"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31150
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-105": {
+      "Interfaces": {
+        "105": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50104
+          },
+          "Remote": {
+            "Addr": "10.0.8.75",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:5f"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31154
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-92": {
+      "Interfaces": {
+        "92": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50091
+          },
+          "Remote": {
+            "Addr": "166.111.71.32",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1154"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31141
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-61": {
+      "Interfaces": {
+        "61": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50060
+          },
+          "Remote": {
+            "Addr": "10.0.8.41",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:54"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31110
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-102": {
+      "Interfaces": {
+        "102": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50101
+          },
+          "Remote": {
+            "Addr": "10.0.8.72",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:bb"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31151
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-17": {
+      "Interfaces": {
+        "17": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50016
+          },
+          "Remote": {
+            "Addr": "10.0.8.24",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:21"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31066
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-16": {
+      "Interfaces": {
+        "16": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50015
+          },
+          "Remote": {
+            "Addr": "10.0.8.8",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:64"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31065
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-53": {
+      "Interfaces": {
+        "53": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50052
+          },
+          "Remote": {
+            "Addr": "10.0.8.23",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1075"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31102
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-79": {
+      "Interfaces": {
+        "79": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50078
+          },
+          "Remote": {
+            "Addr": "10.0.8.57",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:7c"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31128
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-65": {
+      "Interfaces": {
+        "65": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50064
+          },
+          "Remote": {
+            "Addr": "10.0.8.43",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1109"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31114
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-37": {
+      "Interfaces": {
+        "37": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50036
+          },
+          "Remote": {
+            "Addr": "10.0.8.19",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1039"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31086
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-19": {
+      "Interfaces": {
+        "19": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50018
+          },
+          "Remote": {
+            "Addr": "10.0.8.2",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1074"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31068
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-44": {
+      "Interfaces": {
+        "44": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50043
+          },
+          "Remote": {
+            "Addr": "10.0.8.33",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f1"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31093
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-59": {
+      "Interfaces": {
+        "59": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50058
+          },
+          "Remote": {
+            "Addr": "10.0.8.40",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1080"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31108
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-52": {
+      "Interfaces": {
+        "52": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50051
+          },
+          "Remote": {
+            "Addr": "196.38.151.35",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:2a"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31101
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-21": {
+      "Interfaces": {
+        "21": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50020
+          },
+          "Remote": {
+            "Addr": "10.0.8.7",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:e5"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31070
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-42": {
+      "Interfaces": {
+        "42": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50041
+          },
+          "Remote": {
+            "Addr": "10.0.8.30",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:eb"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31091
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-29": {
+      "Interfaces": {
+        "29": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50028
+          },
+          "Remote": {
+            "Addr": "10.0.8.18",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1107"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31078
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-117": {
+      "Interfaces": {
+        "117": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50116
+          },
+          "Remote": {
+            "Addr": "10.0.8.89",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:ef"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31166
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-81": {
+      "Interfaces": {
+        "81": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50080
+          },
+          "Remote": {
+            "Addr": "10.0.8.82",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:d8"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31130
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-14": {
+      "Interfaces": {
+        "14": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50013
+          },
+          "Remote": {
+            "Addr": "10.0.8.5",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1005"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31063
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-82": {
+      "Interfaces": {
+        "82": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50081
+          },
+          "Remote": {
+            "Addr": "86.119.26.72",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1127"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31131
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-77": {
+      "Interfaces": {
+        "77": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50076
+          },
+          "Remote": {
+            "Addr": "10.0.8.56",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:73"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31126
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-54": {
+      "Interfaces": {
+        "54": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50053
+          },
+          "Remote": {
+            "Addr": "203.115.126.83",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:31"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31103
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-95": {
+      "Interfaces": {
+        "95": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50094
+          },
+          "Remote": {
+            "Addr": "10.0.8.68",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-1162"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31144
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-124": {
+      "Interfaces": {
+        "124": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50123
+          },
+          "Remote": {
+            "Addr": "10.0.8.95",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:100"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31173
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-63": {
+      "Interfaces": {
+        "63": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50062
+          },
+          "Remote": {
+            "Addr": "10.0.8.29",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1089"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31112
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-90": {
+      "Interfaces": {
+        "90": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50089
+          },
+          "Remote": {
+            "Addr": "10.0.8.64",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:8f"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31139
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-38": {
+      "Interfaces": {
+        "38": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50037
+          },
+          "Remote": {
+            "Addr": "10.0.8.14",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:c5"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31087
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-116": {
+      "Interfaces": {
+        "116": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50115
+          },
+          "Remote": {
+            "Addr": "10.0.8.88",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f7"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31165
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-83": {
+      "Interfaces": {
+        "83": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50082
+          },
+          "Remote": {
+            "Addr": "10.0.8.59",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1128"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31132
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-43": {
+      "Interfaces": {
+        "43": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50042
+          },
+          "Remote": {
+            "Addr": "10.0.8.32",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f0"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31092
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-22": {
+      "Interfaces": {
+        "22": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50021
+          },
+          "Remote": {
+            "Addr": "192.33.93.155",
+            "L4Port": 49999
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1014"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31071
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-115": {
+      "Interfaces": {
+        "115": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50114
+          },
+          "Remote": {
+            "Addr": "10.0.8.86",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f4"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31164
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-78": {
+      "Interfaces": {
+        "78": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50077
+          },
+          "Remote": {
+            "Addr": "5.148.175.231",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1123"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31127
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-27": {
+      "Interfaces": {
+        "27": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50026
+          },
+          "Remote": {
+            "Addr": "10.0.8.16",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1025"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31076
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-121": {
+      "Interfaces": {
+        "121": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50120
+          },
+          "Remote": {
+            "Addr": "10.0.8.93",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:fb"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31170
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-26": {
+      "Interfaces": {
+        "26": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50025
+          },
+          "Remote": {
+            "Addr": "10.0.8.15",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1022"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31075
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-64": {
+      "Interfaces": {
+        "64": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50063
+          },
+          "Remote": {
+            "Addr": "10.0.8.42",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:6"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31113
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-70": {
+      "Interfaces": {
+        "70": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50069
+          },
+          "Remote": {
+            "Addr": "10.0.8.48",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:bf"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31119
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-69": {
+      "Interfaces": {
+        "69": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50068
+          },
+          "Remote": {
+            "Addr": "10.0.8.47",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1094"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31118
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-113": {
+      "Interfaces": {
+        "113": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50112
+          },
+          "Remote": {
+            "Addr": "10.0.8.85",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f3"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31162
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-51": {
+      "Interfaces": {
+        "51": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50050
+          },
+          "Remote": {
+            "Addr": "196.202.199.54",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:29"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31100
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-20": {
+      "Interfaces": {
+        "20": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50019
+          },
+          "Remote": {
+            "Addr": "10.0.8.10",
+            "L4Port": 49999
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1016"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31069
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-23": {
+      "Interfaces": {
+        "23": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50022
+          },
+          "Remote": {
+            "Addr": "10.0.8.31",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:e8"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31072
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-118": {
+      "Interfaces": {
+        "118": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50117
+          },
+          "Remote": {
+            "Addr": "10.0.8.90",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:fd"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31167
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-122": {
+      "Interfaces": {
+        "122": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50121
+          },
+          "Remote": {
+            "Addr": "192.168.1.129",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:f9"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31171
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-99": {
+      "Interfaces": {
+        "99": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50098
+          },
+          "Remote": {
+            "Addr": "10.0.8.70",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:b9"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31148
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-97": {
+      "Interfaces": {
+        "97": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50096
+          },
+          "Remote": {
+            "Addr": "80.254.171.245",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:b7"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31146
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-72": {
+      "Interfaces": {
+        "72": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50071
+          },
+          "Remote": {
+            "Addr": "10.0.8.55",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:ed"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31121
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-73": {
+      "Interfaces": {
+        "73": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50072
+          },
+          "Remote": {
+            "Addr": "10.0.8.51",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1101"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31122
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-60": {
+      "Interfaces": {
+        "60": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50059
+          },
+          "Remote": {
+            "Addr": "10.0.8.76",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:c0"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31109
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-74": {
+      "Interfaces": {
+        "74": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50073
+          },
+          "Remote": {
+            "Addr": "10.0.8.52",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:1"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31123
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-103": {
+      "Interfaces": {
+        "103": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50102
+          },
+          "Remote": {
+            "Addr": "10.0.8.73",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:bc"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31152
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-11": {
+      "Interfaces": {
+        "11": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50010
+          },
+          "Remote": {
+            "Addr": "113.240.234.241",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1073"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31060
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-28": {
+      "Interfaces": {
+        "28": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50027
+          },
+          "Remote": {
+            "Addr": "10.0.8.17",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1023"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31077
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-112": {
+      "Interfaces": {
+        "112": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50111
+          },
+          "Remote": {
+            "Addr": "10.0.8.83",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:de"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31161
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-104": {
+      "Interfaces": {
+        "104": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50103
+          },
+          "Remote": {
+            "Addr": "10.0.8.74",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:be"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31153
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-24": {
+      "Interfaces": {
+        "24": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50023
+          },
+          "Remote": {
+            "Addr": "10.0.8.27",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:12"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31073
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-80": {
+      "Interfaces": {
+        "80": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50079
+          },
+          "Remote": {
+            "Addr": "10.0.8.60",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:d7"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31129
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-48": {
+      "Interfaces": {
+        "48": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50047
+          },
+          "Remote": {
+            "Addr": "10.0.8.36",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:43"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31097
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-88": {
+      "Interfaces": {
+        "88": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50087
+          },
+          "Remote": {
+            "Addr": "10.0.8.62",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1139"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31137
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-55": {
+      "Interfaces": {
+        "55": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50054
+          },
+          "Remote": {
+            "Addr": "80.157.129.52",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:32"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31104
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-114": {
+      "Interfaces": {
+        "114": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50113
+          },
+          "Remote": {
+            "Addr": "10.0.8.87",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:77"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31163
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-67": {
+      "Interfaces": {
+        "67": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50066
+          },
+          "Remote": {
+            "Addr": "203.44.193.212",
+            "L4Port": 49999
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:2b"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31116
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-12": {
+      "Interfaces": {
+        "12": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50011
+          },
+          "Remote": {
+            "Addr": "10.0.8.9",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1003"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31061
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-62": {
+      "Interfaces": {
+        "62": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "192.33.93.195",
+            "L4Port": 50061
+          },
+          "Remote": {
+            "Addr": "159.100.249.155",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1085"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31111
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-111": {
+      "Interfaces": {
+        "111": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50110
+          },
+          "Remote": {
+            "Addr": "10.0.8.84",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:cd"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31160
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-108": {
+      "Interfaces": {
+        "108": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50107
+          },
+          "Remote": {
+            "Addr": "10.0.8.79",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:1d"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31157
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-57": {
+      "Interfaces": {
+        "57": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50056
+          },
+          "Remote": {
+            "Addr": "10.0.8.38",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1078"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31106
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-25": {
+      "Interfaces": {
+        "25": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50024
+          },
+          "Remote": {
+            "Addr": "10.0.8.13",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1021"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31074
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-86": {
+      "Interfaces": {
+        "86": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50085
+          },
+          "Remote": {
+            "Addr": "10.0.8.99",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:e0"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31135
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-96": {
+      "Interfaces": {
+        "96": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50095
+          },
+          "Remote": {
+            "Addr": "10.0.8.69",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:c7"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31145
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-75": {
+      "Interfaces": {
+        "75": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50074
+          },
+          "Remote": {
+            "Addr": "10.0.8.53",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:1a"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31124
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-45": {
+      "Interfaces": {
+        "45": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50044
+          },
+          "Remote": {
+            "Addr": "10.0.8.50",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:ea"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31094
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-119": {
+      "Interfaces": {
+        "119": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50118
+          },
+          "Remote": {
+            "Addr": "10.0.8.91",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:fe"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31168
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-110": {
+      "Interfaces": {
+        "110": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50109
+          },
+          "Remote": {
+            "Addr": "10.0.8.81",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:ca"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31159
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-58": {
+      "Interfaces": {
+        "58": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50057
+          },
+          "Remote": {
+            "Addr": "10.0.8.39",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-1079"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31107
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-128": {
+      "Interfaces": {
+        "128": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50127
+          },
+          "Remote": {
+            "Addr": "10.0.8.100",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:ee"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31177
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-126": {
+      "Interfaces": {
+        "126": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50125
+          },
+          "Remote": {
+            "Addr": "10.0.8.97",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:101"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31175
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-35": {
+      "Interfaces": {
+        "35": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50034
+          },
+          "Remote": {
+            "Addr": "10.0.8.25",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:24"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31084
+            }
+          ]
+        }
+      ]
+    },
+    "br17-ffaa_0_1107-46": {
+      "Interfaces": {
+        "46": {
+          "Bandwidth": 1000,
+          "LinkTo": "CHILD",
+          "Public": {
+            "Addr": "10.0.8.1",
+            "L4Port": 50045
+          },
+          "Remote": {
+            "Addr": "10.0.8.34",
+            "L4Port": 50000
+          },
+          "MTU": 1472,
+          "InternalAddrIdx": 0,
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "17-ffaa:1:41"
+        }
+      },
+      "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "Addr": "192.33.93.195",
+              "L4Port": 31095
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "MTU": 1472,
+  "ZookeeperService": {
+    "1": {
+      "Addr": "192.33.93.195",
+      "L4Port": 2181
+    }
+  },
+  "Core": false,
+  "Overlay": "UDP/IPv4"
+}
