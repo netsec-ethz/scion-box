@@ -160,7 +160,7 @@ if [ $inside_docker -eq 0 ]; then
     sudo systemctl stop "updateAS.service" || true
     for f in "${service_files[@]}"; do
         cp "$f" "$TMPFILE"
-        sed -i -- "s/_USER_/$USER/g" "$TMPFILE"
+        sed -i "s|_USER_|$USER|g;s|/usr/local/go/bin|$(dirname $(which go))|g" "$TMPFILE"
         sudo cp "$TMPFILE" "/etc/systemd/system/$(basename $f)"
     done
     sudo systemctl daemon-reload
