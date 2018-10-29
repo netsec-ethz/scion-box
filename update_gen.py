@@ -525,11 +525,11 @@ class LocalConfig:
             instances = tp[type_key].keys()
             for instance_name in instances:
                 config = prep_supervisord_conf(tp[type_key][instance_name], executable_name,
-                                               service_type, instance_name, ia)
+                                               service_type, instance_name, ia, "127.0.0.1")
                 instance_path = get_elem_dir(self.gen_path, ia, instance_name)
+                write_supervisord_config(config, instance_path)
                 write_certs_trc_keys(ia, as_obj, instance_path)
                 write_as_conf_and_path_policy(ia, as_obj, instance_path)
-                write_supervisord_config(config, instance_path)
                 write_topology_file(tp, type_key, instance_path)
                 write_zlog_file(service_type, instance_name, instance_path)
         # We don't need to create zk configration for existing ASes
