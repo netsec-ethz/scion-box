@@ -38,6 +38,6 @@ done
 export PYTHONPATH=$SC:$SC/python:$BASE/sub/util/:$BASE
 for IA in "${IAS[@]}"; do
     echo "Updating AP for IA: $IA ..."
-    python3 $BASE/update_gen.py --url "$URL" --updateAS "$IA" --accountId "$ACC_ID" --secret "$ACC_PW" --address "$IP_ADDR" --fullsync
+    python3 $BASE/update_gen.py --url "$URL" --updateAS "$IA" --accountId "$ACC_ID" --secret "$ACC_PW" --address "$IP_ADDR"
 done
 echo "Done updating AP."

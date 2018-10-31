@@ -23,7 +23,7 @@
     }
   },
   "BorderRouters": {
-    "br1-ff00_0_110-1": {
+    "br1-ff00_0_110": {
       "Interfaces": {
         "1": {
           "ISD_AS": "1-ff00:0:1",
@@ -40,21 +40,7 @@
           "Bandwidth": 1000,
           "LinkTo": "PARENT",
           "Overlay": "UDP/IPv4"
-        }
-      },
-      "InternalAddrs": [
-        {
-          "Public": [
-            {
-              "L4Port": 31051,
-              "Addr": "127.0.0.9"
-            }
-          ]
-        }
-      ]
-    },
-    "br1-ff00_0_110-11": {
-      "Interfaces": {
+        },
         "72": {
           "ISD_AS": "1-ff00:0:111",
           "Remote": {
@@ -62,7 +48,7 @@
             "Addr": "192.168.1.8"
           },
           "MTU": 1472,
-          "InternalAddrIdx": 0,
+          "InternalAddrIdx": 1,
           "Public": {
             "L4Port": 50021,
             "Addr": "127.0.0.4"
@@ -78,7 +64,7 @@
             "Addr": "192.168.1.9"
           },
           "MTU": 1472,
-          "InternalAddrIdx": 1,
+          "InternalAddrIdx": 2,
           "Public": {
             "L4Port": 50022,
             "Addr": "127.0.0.4"
@@ -89,6 +75,14 @@
         }
       },
       "InternalAddrs": [
+        {
+          "Public": [
+            {
+              "L4Port": 31051,
+              "Addr": "127.0.0.9"
+            }
+          ]
+        },
         {
           "Public": [
             {

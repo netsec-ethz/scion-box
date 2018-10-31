@@ -70,6 +70,9 @@ BANDWIDTH = 1000
 #: First internal port assigned to border routers
 BR_INTERNAL_START_PORT = 31050
 
+#: Maximum number of interfaces per border router
+MAX_IFACES_IN_BR = 12
+
 #: Default key set for new SCIONLabAS join requests
 REMOVE = 'Remove'
 UPDATE = 'Update'
@@ -83,9 +86,6 @@ effects = {
     UPDATE: UPDATED,
     CREATE: CREATED,
 }
-#: API calls at the coordinator
-ONLY_AS_TO_UPDATE = None
-
 
 def asid_is_infrastructure(asid):
     return asid > 0xffaa00000000 and asid < 0xffaa00010000
@@ -118,8 +118,11 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
         new_tp = copy.deepcopy(tp)
 
         _remove_child_interfaces(new_tp)
-        br = _combine_border_routers(new_tp, 'br{}'.format(my_asid))
-
+        # this is the "infrastructure border router":
+        br = _combine_border_routers(new_tp, 'br{}-1'.format(my_asid))
+        existing_ifids = [k for k in br.get('Interfaces', [])]
+        br = _create_border_router()
+        userBRs = [br] # these are the "user border routers"
         # add the interfaces for the links specified by the Coordinator to the BR
         skipped = []
         for i, conn in enumerate(connections):
@@ -131,15 +134,21 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
             is_vpn = conn['IsVPN']
             user = conn['VPNUserID']
             # refuse to update if infrastructure BRID or already existent:
-            if if_id <= 10 or str(if_id) in br.get('Interfaces', []):
+            if if_id <= 10 or str(if_id) in existing_ifids:
                 skipped.append(i)
                 continue
-
+            if len(br['Interfaces']) >= MAX_IFACES_IN_BR:
+                br = _create_border_router()
+                userBRs.append(br)
             ap_ip = VPN_ADDR if is_vpn else config.interface_ip
             _insert_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port, config.internal_ip)
+            existing_ifids.append(str(if_id))
 
             if is_vpn:
                 config.configure_vpn_ip(user, as_ip) # XXX: config files are not cleaned up
+        for i, br in enumerate(userBRs):
+            brname = 'br{}-{}'.format(my_asid, i + 11)
+            new_tp['BorderRouters'][brname] = br
         skipped = set(skipped)
         if skipped:
             print("********************************* ERROR *************************")
@@ -237,55 +246,6 @@ def _combine_border_routers(topo, brname):
     return br
 
 
-
-def deltasync_local_gen(config, coordinator, asid):
-    """
-    The update the topology configuration by requesting a list of changes from the coordinator.
-    :param config: The LocalConfig object used to read and write the configuration
-    :param coordinator: the CoordinatorServer object used to communicate with the coordinator
-    :param asid: the AS-ID of the access point for which the configuration will be updated
-    :returns: Has the topology changed?
-    """
-
-    topo_has_changed = False
-    updated_ases = {}
-    original_topo = []
-    new_as_dict = coordinator.request_deltasync(asid)
-
-    isdas_list = [asid] # XXX: only one AS supported by query, this could work with multiple ASes
-
-    for my_asid, new_reqs in new_as_dict.items():
-        if my_asid not in isdas_list:
-            continue
-        updated_ases[my_asid] = {}
-        updated_ases[my_asid][CREATED] = []
-        updated_ases[my_asid][UPDATED] = []
-        updated_ases[my_asid][REMOVED] = []
-
-        as_obj, tp = config.load_topology(my_asid)
-        original_topo.append((my_asid, as_obj, tp))
-        new_tp = copy.deepcopy(tp)
-
-        for req_type in new_reqs.keys():
-            if new_reqs[req_type]:
-                modifiedASes, topo_changed_now = update_topology(config, my_asid, new_reqs, req_type, new_tp)
-                updated_ases[my_asid][effects[req_type]].extend(modifiedASes)
-                if topo_changed_now:
-                    config.write_topology(my_asid, as_obj, new_tp)
-                    topo_has_changed = True
-
-    if topo_has_changed:
-        print("[INFO] Configuration changed. Acknowledge to the SCION-COORD server")
-        try:
-            coordinator.reply_deltasync(updated_ases)
-        except Exception as ex:
-            print("[ERROR] Failed to connect to SCION-COORD server: \n%s" % ex)
-            for my_asid, as_obj, old_tp in original_topo:
-                print("[INFO] Retrieving the original topology configuration: %s" % my_asid)
-                config.write_topology(my_asid, as_obj, old_tp)
-            exit(1)
-    return topo_has_changed
-
 class CoordinatorServer:
     """
     Communicate with SCIONLab coordination server over HTTPS.
@@ -371,62 +331,6 @@ class CoordinatorServer:
             raise Exception("Error while parsing JSON: {} : {}\nContent was: {}".format(type(ex), str(ex), content))
         return resp_dict
 
-    def request_deltasync(self, asid):
-        """
-        Send get requests in order to get newly joined SCIONLab ASes.
-        :param asid: string, AS-id of the access point for which information is requested.
-        :returns: dict describing the update actions to perform
-                     {
-                        '17-ffaa_0_1103': {
-                             'Create': [
-                                 {
-                                     'ASID': '17:ffaa:1:4001',
-                                     'IsVPN': True,
-                                     'VPNUserID': 'user@example.com_4001',
-                                     'UserIP': '10.8.0.42',
-                                     'UserPort': 50000,
-                                     'APPort': 50050,
-                                     'APBRID': 2
-                                 },
-                             ],
-                             'Update': [],
-                             'Remove': []
-                         }
-                     }
-        """
-        url = "{url}/{req}/{accountId}/{accountPwd}?scionLabAP={asid}".format( \
-                    url=self.url,
-                    req=self.GET_REQ,
-                    accountId=self.accountId,
-                    accountPwd=self.accountPwd,
-                    asid=asid)
-        return self._send_request_and_get_json(url)
-
-    def reply_deltasync(self, ack):
-        """
-        Send post request to report the update status to the coordinator.
-        :param ack: dict describing the update actions actually performed:
-                     {
-                        '17-ffaa:0:1103': {
-                             'Created': [
-                                 {
-                                     'IA': '17:ffaa:1:4001',
-                                     'success': True,
-                                 },
-                             ],
-                             'Updated': [],
-                             'Removed': []
-                         }
-                     }
-        """
-        url = "{url}/{req}/{accountId}/{accountPwd}".format( \
-                    url=self.url,
-                    req=self.POST_REQ,
-                    accountId=self.accountId,
-                    accountPwd=self.accountPwd)
-        while url:
-            resp = requests.post(url, json=ack, allow_redirects=False)
-            url = resp.next.url if resp.is_redirect and resp.next else None
 
     def _send_request_and_get_json(self, url):
         """
@@ -618,121 +522,6 @@ class LocalConfig:
         exit(1)
 
 
-def update_topology(config, my_asid, reqs, req_type, tp):
-    """
-    Update the topology by adding, updating and removing BRs as requested.
-    :param config: The LocalConfig used to modify the VPN configuration
-    :param ISD_AS my_asid: current AS number
-    :param dict reqs: requested entities to be changed from current topology
-    :param str req_type: type of requested changes
-    :param dict tp: in/out existing topology / updated topology
-    :returns: modified user ASes and boolean indicating if topology is now different
-    """
-
-    brs = tp['BorderRouters']
-    modifiedASes = []
-    topo_has_changed = False
-    for req in reqs[req_type]:
-        success = False
-        user = req['VPNUserID']
-        as_id = req['ASID']
-        as_ip = req['UserIP']
-        is_vpn = req['IsVPN']
-        ap_port = req['APPort']
-        as_port = req['UserPort']
-        if_id = req['APBRID']
-        ap_ip = VPN_ADDR if is_vpn else config.interface_ip
-
-        if req_type == REMOVE:
-            current_br, current_if_id = _get_br_ifid_from_as(as_id, tp)
-            if current_br:
-                _remove_interface(current_br, current_if_id, tp)
-                if is_vpn:
-                    config.remove_vpn_ip(user)
-                success = True
-        elif req_type == UPDATE:
-            current_br, current_if_id = _get_br_ifid_from_as(as_id, tp)
-            if current_br:
-                if current_if_id == if_id:
-                    _update_interface(brs[current_br], if_id, as_id, as_ip, as_port, ap_ip, ap_port)
-                else:
-                    _remove_interface(current_br, current_if_id, tp)
-                    _insert_interface(brs[current_br], if_id, as_id, as_ip, as_port, ap_ip, ap_port, config.internal_ip)
-                if is_vpn:
-                    config.configure_vpn_ip(user, as_ip)
-                success = True
-        else:
-            br = brs.setdefault('br{}'.format(my_asid), {})
-            _insert_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port, config.internal_ip)
-            if is_vpn:
-                config.configure_vpn_ip(user, as_ip)
-            success = True
-        modifiedASes.append({"IA": as_id, "success": success})
-        topo_has_changed = topo_has_changed or success
-
-    return modifiedASes, topo_has_changed
-
-
-def _get_br_ifid_from_as(as_id, tp):
-    """
-    Parses border router topology and returns the ID of the current border router
-    corresponding to the given ISD-AS string
-    :param str as_id: ISD-AS string
-    :param dict tp: target AS topology
-    :returns: the border router name and Interface-ID corresponding to this AS if it exists
-    """
-    brs = tp['BorderRouters']
-    for br, br_dict in brs.items():
-        for if_id, _ in br_dict['Interfaces'].items():
-            if br_dict['Interfaces'][if_id]['ISD_AS'] != as_id:
-                continue
-            else:
-                return br, int(if_id)
-    return None, None
-
-
-def _remove_interface(brname, if_id, tp):
-    """
-    Remove an interface from the topology
-    :param str br: border router name
-    :param int if_id: interface id
-    :param dict tp: target AS topology
-    """
-    brs = tp['BorderRouters']
-    br = brs[brname]
-    if len(br['Interfaces']) == 1:
-        del brs[brname]
-    else:
-        internalAddrIdx = br['Interfaces'][str(if_id)]['InternalAddrIdx']
-        del br['Interfaces'][str(if_id)]
-
-        # if that was the last reference to this internal addr, remove it and patch the indices
-        if not internalAddrIdx in (iface['InternalAddrIdx'] for iface in br['Interfaces'].values()):
-            del br['InternalAddrs'][internalAddrIdx]
-            for iface in br['Interfaces'].values():
-                if iface['InternalAddrIdx'] > internalAddrIdx:
-                    iface['InternalAddrIdx'] -= 1
-
-
-def _update_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port):
-    """
-    Update a BorderRouter Interface entry
-    :param str br: border router name
-    :param int if_id: interface id
-    :param str as_id: remote AS ID
-    :param str as_ip: the IP address of the remote AS
-    :param int as_port: the port number of the remote AS
-    :param str ap_ip: the IP address of the attachment point
-    :param int ap_port: the port number of the attachment point
-    :param dict tp: target AS topology
-    """
-    iface = br['Interfaces'][str(if_id)]
-    iface['ISD_AS'] = as_id
-    iface['Remote']['Addr'] = as_ip
-    iface['Remote']['L4Port'] = as_port
-    iface['Public']['Addr'] = ap_ip
-    iface['Public']['L4Port'] = ap_port
-
 def _insert_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port, internal_ip):
     """
     Create and insert interface in the BorderRouter entry in the topology
@@ -781,7 +570,13 @@ def _insert_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port, internal
         "ISD_AS": as_id
     }
 
-
+def _create_border_router():
+    return {
+        'InternalAddrs': [
+        ],
+        'Interfaces': {
+        }
+    }
 
 
 def _restart_scion():
@@ -808,8 +603,6 @@ def parse_command_line_args():
                         help="The secret for the SCION Coordinator account that has permission to access this AS")
     parser.add_argument("--updateAS", nargs="?", type=str, metavar="IA, e.g. 1-12",
                         help="The AS to update. If not specified, the first one from the existing ones will be updated")
-    parser.add_argument("--fullsync", action="store_true",
-                        help="Generate IPv6 addresses")
 
     # The required arguments will be present, or parse_args will exit the application
     args = parser.parse_args()
@@ -827,11 +620,8 @@ def main():
 
     asid = args.updateAS or config.get_asids()[0]
 
-    if args.fullsync:
-        timestamp = int(time.time())
-        topo_has_changed = fullsync_local_gen(config, coordinator, asid, timestamp)
-    else:
-        topo_has_changed = deltasync_local_gen(config, coordinator, asid)
+    timestamp = int(time.time())
+    topo_has_changed = fullsync_local_gen(config, coordinator, asid, timestamp)
 
     if topo_has_changed:
         print("[INFO] Restarting SCION")
