@@ -26,19 +26,12 @@ from subprocess import call
 import yaml
 import argparse
 import time
-from lib.packet.scion_addr import ISD_AS
-
+import glob
 
 # SCION
-from lib.defines import (
-    GEN_PATH,
-    PROJECT_ROOT,
-)
-from topology.generator import (
-    INITIAL_CERT_VERSION,
-    INITIAL_TRC_VERSION,
-    TopoID,
-)
+from lib.packet.scion_addr import ISD_AS
+from lib.defines import GEN_PATH, PROJECT_ROOT
+from topology.common import TopoID
 
 # SCION-Utilities
 from local_config_util import (
@@ -53,6 +46,7 @@ from local_config_util import (
     write_supervisord_config,
     write_topology_file,
     write_zlog_file,
+    write_toml_files,
     TYPES_TO_EXECUTABLES,
     TYPES_TO_KEYS,
     PROM_PORT_OFFSET,
@@ -69,7 +63,7 @@ VPN_NETMASK = "255.255.255.0"
 MTU = 1472
 BANDWIDTH = 1000
 #: First internal port assigned to border routers
-BR_INTERNAL_START_PORT = 31050
+BR_INTERNAL_START_PORT = 30050
 
 #: Maximum number of interfaces per border router
 MAX_IFACES_IN_BR = 12
@@ -113,7 +107,6 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
     isdas_list = [asid] # XXX: only one AS supported by query, this could work with multiple ASes
 
     monitoring_remap_in_progress = os.path.exists(os.path.join(config.gen_path, ENDPOINT2SMS_REMAP_IN_PROGRESS_FILE))
-
     for my_asid, status in fullsynced.items():
         if my_asid not in isdas_list:
             continue
@@ -126,8 +119,9 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
         # this is the "infrastructure border router":
         br = _combine_border_routers(new_tp, 'br{}-1'.format(my_asid))
         existing_ifids = [k for k in br.get('Interfaces', [])]
-        br = _create_border_router()
-        userBRs = [br] # these are the "user border routers"
+        br = None
+        # TODO: we probably want to have just one infrastructure BR and one user BR
+        userBRs = [] # these are the "user border routers"
         # add the interfaces for the links specified by the Coordinator to the BR
         skipped = []
         for i, conn in enumerate(connections):
@@ -142,7 +136,7 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
             if if_id <= 10 or str(if_id) in existing_ifids:
                 skipped.append(i)
                 continue
-            if len(br['Interfaces']) >= MAX_IFACES_IN_BR:
+            if not br or len(br['Interfaces']) >= MAX_IFACES_IN_BR:
                 br = _create_border_router()
                 userBRs.append(br)
             ap_ip = VPN_ADDR if is_vpn else config.interface_ip
@@ -157,7 +151,8 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
         skipped = set(skipped)
         if skipped:
             print("********************************* ERROR *************************")
-            print("Refuse to update the topology with certain BRs. Too dangerous. Skipped connections are: {}".format([connections[i] for i in skipped]))
+            print("Refused to update the topology with certain BRs. Too dangerous. Skipped connections are: {}".format([connections[i] for i in skipped]))
+        # connections is referenced in status. Update it:
         connections[:] = [connections[i] for i in range(len(connections)) if i not in skipped]
         ack_to_coordinator_message[my_asid] = status
 
@@ -221,35 +216,15 @@ def _remove_child_interfaces(topo):
     brs = topo['BorderRouters']
     for brname in list(brs.keys()): # list() because we del()
         br = brs[brname]
-
-        # count references to internal addrs:
-        internalAddrIdxCounter = collections.Counter(iface['InternalAddrIdx'] for iface in br['Interfaces'].values())
         for ifnum in list(br['Interfaces'].keys()):
             iface = br['Interfaces'][ifnum]
             ia = ISD_AS(iface['ISD_AS'])
-            internalAddrIdx = iface['InternalAddrIdx']
-            # if the link is to a child and that child is a user AS
             if not asid_is_infrastructure(ia[1]) and iface['LinkTo'] == 'CHILD':
-                internalAddrIdxCounter[internalAddrIdx] -= 1
                 del br['Interfaces'][ifnum]
 
         if not br['Interfaces']: # no interfaces left -> remove BR
             del brs[brname]
-        else:
-            # remove unreferenced internal addrs:
-            idxsToRemove = (idx for idx, count in internalAddrIdxCounter.items() if count is 0)
-            for i in sorted(idxsToRemove, reverse=True):
-                del br['InternalAddrs'][i]
-            # patch remaining internal adddress indexes:
-            idxRemap = {}
-            idxOffset = 0
-            for idx, count in internalAddrIdxCounter.items():
-                if count == 0:
-                    idxOffset += 1
-                else:
-                    idxRemap[idx] = idx-idxOffset
-            for iface in br['Interfaces'].values():
-                iface['InternalAddrIdx'] = idxRemap[iface['InternalAddrIdx']]
+
 
 def _combine_border_routers(topo, brname):
     """
@@ -266,16 +241,18 @@ def _combine_border_routers(topo, brname):
         br = brs[brname] = brs.pop(next(iter(brs))) # rename
     else:
         br = brs.setdefault(brname, {})
-        # merge interfaces of all other BRs into `br`
-        internalAddrs = br.setdefault('InternalAddrs', [])
+        # merge interfaces, internal and control addrs of all other BRs into `br`
+        internalAddrs = br.setdefault('InternalAddrs', {})
+        ctrlAddrs = br.setdefault('CtrlAddr', {})
         interfaces = br.setdefault('Interfaces', {})
         for currBrName in sorted(set(brs.keys()) - {brname}):
             currBr = brs[currBrName]
-            internalAddrIdx = len(internalAddrs)
-            internalAddrs.append(currBr['InternalAddrs'][0]) # assume only one interface per input BR
-            ifid, iface = next(iter(currBr['Interfaces'].items()))
-            iface['InternalAddrIdx'] = internalAddrIdx
-            interfaces[ifid] = iface
+            for proto, addr in currBr['InternalAddrs'].items():
+                internalAddrs.setdefault(proto, addr)
+            for proto, addr in currBr['CtrlAddr'].items():
+                ctrlAddrs.setdefault(proto, addr)
+            for ifid, iface in currBr['Interfaces'].items():
+                interfaces.setdefault(ifid, iface)
             del brs[currBrName]
     return br
 
@@ -420,26 +397,27 @@ class LocalConfig:
                 topo_dict = json.load(topo_file)
             with open(os.path.join(process_path, 'keys/as-sig.seed')) as sig_file:
                 sig_priv_key = sig_file.read()
-            with open(os.path.join(process_path, 'keys/as-sig.key')) as sig_file:
-                sig_priv_key_raw = sig_file.read()
             with open(os.path.join(process_path, 'keys/as-decrypt.key')) as enc_file:
                 enc_priv_key = enc_file.read()
-            with open(os.path.join(process_path, 'certs/ISD%s-AS%s-V%s.crt' %
-                                   (ia[0], as_str, INITIAL_CERT_VERSION))) as cert_file:
+            with open(os.path.join(process_path, 'keys/master0.key')) as master0_file:
+                master0_as_key = master0_file.read()
+            with open(os.path.join(process_path, 'keys/master1.key')) as master1_file:
+                master1_as_key = master1_file.read()
+            with open(sorted(glob.glob(os.path.join(process_path, 'certs/*.crt')),
+                      reverse=True)[0]) as cert_file:
                 certificate = cert_file.read()
-            with open(os.path.join(process_path, 'certs/ISD%s-V%s.trc' %
-                                   (ia[0], INITIAL_TRC_VERSION))) as trc_file:
+            files = sorted(glob.glob(os.path.join(process_path, 'certs/*.trc')), reverse=True)
+            with open(sorted(glob.glob(os.path.join(process_path, 'certs/*.trc')),
+                      reverse=True)[0]) as trc_file:
                 trc = trc_file.read()
-            with open(os.path.join(process_path, 'as.yml')) as conf_file:
-                master_as_key = self._get_masterkey(conf_file)
         except OSError as e:
             print("[ERROR] Unable to open '%s': \n%s" % (e.filename, e.strerror))
             exit(1)
         key_dict = {
             'enc_key': enc_priv_key,
             'sig_key': sig_priv_key,
-            'sig_key_raw': sig_priv_key_raw,
-            'master_as_key': master_as_key,
+            'master0_as_key': master0_as_key,
+            'master1_as_key': master1_as_key,
         }
         as_obj = ASCredential(certificate, trc, key_dict)
         return as_obj, topo_dict
@@ -453,9 +431,11 @@ class LocalConfig:
         """
         ia = TopoID(asid)
 
-        write_dispatcher_config(self.gen_path)
         as_path = get_elem_dir(self.gen_path, ia, "")
         rmtree(as_path, True)
+        os.chdir(os.path.dirname(self.gen_path)) # functions from $SC/python/topology use relative paths
+        write_dispatcher_config(self.gen_path)
+        write_toml_files(tp, ia)
         for service_type, type_key in TYPES_TO_KEYS.items():
             executable_name = TYPES_TO_EXECUTABLES[service_type]
             if type_key not in tp:
@@ -465,9 +445,9 @@ class LocalConfig:
                 config = prep_supervisord_conf(tp[type_key][instance_name], executable_name,
                                                service_type, instance_name, ia, "127.0.0.1")
                 instance_path = get_elem_dir(self.gen_path, ia, instance_name)
-                write_supervisord_config(config, instance_path)
                 write_certs_trc_keys(ia, as_obj, instance_path)
                 write_as_conf_and_path_policy(ia, as_obj, instance_path)
+                write_supervisord_config(config, instance_path)
                 write_topology_file(tp, type_key, instance_path)
                 write_zlog_file(service_type, instance_name, instance_path)
         # We don't need to create zk configration for existing ASes
@@ -541,24 +521,11 @@ class LocalConfig:
         print("[ERROR] Unable to load topology.json")
         exit(1)
 
-    def _get_masterkey(self, conf_file):
-        """
-        Parse the configruation file and extract the Master key
-        :param filestream conf_file: configuration file as a filestream
-        :returns: Master key as a string
-        """
-        try:
-            as_conf = yaml.load(conf_file)
-            key = as_conf['MasterASKey']
-            return key
-        except:
-            print("[ERROR] Unable to load the AS master key")
-        exit(1)
-
 
 def _insert_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port, internal_ip):
     """
-    Create and insert interface in the BorderRouter entry in the topology
+    Create and insert interface in the BorderRouter entry in the topology.
+    If there is no ctrl address, add one. Same for internal address.
     :param ap_addrs: IP/Port of Access Point
     :param dict br: BorderRouters entry in target topology
     :param int if_id: interface ID
@@ -574,42 +541,38 @@ def _insert_interface(br, if_id, as_id, as_ip, as_port, ap_ip, ap_port, internal
     mtu = MTU
     bandwidth = BANDWIDTH
 
-    internalAddrs = br.setdefault('InternalAddrs', [])
+    controlAddrs = br.setdefault('CtrlAddr', {})
+    internalAddrs = br.setdefault('InternalAddrs', {})
     interfaces = br.setdefault('Interfaces', {})
 
-    internalAddrIdx = len(internalAddrs)
-    internalAddrs.append({
-        'Public': [
-            {
-                'Addr': internal_ip,
-                'L4Port': BR_INTERNAL_START_PORT - 1 + if_id
-            }
-        ]
-    })
-
+    controlAddrs.setdefault('IPv4', {'Public':{
+                                'Addr': internal_ip, 
+                                'L4Port': BR_INTERNAL_START_PORT - 1 + if_id}})
+    internalAddrs.setdefault('IPv4', {'PublicOverlay':{
+                                'Addr': internal_ip,
+                                'OverlayPort': BR_INTERNAL_START_PORT + 1000 - 1 + if_id}})
     interfaces[str(if_id)] = {
         "Overlay": "UDP/IPv4",
-        "Bandwidth": bandwidth,
-        "Remote": {
-            "L4Port": as_port,
-            "Addr": as_ip
-        },
-        "MTU": mtu,
+        "ISD_AS": as_id,
         "LinkTo": "CHILD",
-        "Public": {
-            "L4Port": ap_port,
-            "Addr": ap_ip
+        "Bandwidth": bandwidth,
+        "MTU": mtu,
+        "RemoteOverlay": {
+            "Addr": as_ip,
+            "OverlayPort": as_port,
         },
-        "InternalAddrIdx": internalAddrIdx,
-        "ISD_AS": as_id
+        "PublicOverlay": {
+            "Addr": ap_ip,
+            "OverlayPort": ap_port,
+        },
     }
+
 
 def _create_border_router():
     return {
-        'InternalAddrs': [
-        ],
-        'Interfaces': {
-        }
+        'InternalAddrs': {},
+        'CtrlAddr': {},
+        'Interfaces': {},
     }
 
 
@@ -621,7 +584,8 @@ def _restart_scion():
     call([scion_command, "stop"])
     call([supervisor_command, "shutdown"])
     call([supervisor_command, "reload"])
-    call([scion_command, "run"])
+    call([scion_command, "start", "nobuild"])
+
 
 def parse_command_line_args():
     parser = argparse.ArgumentParser(description="Update the SCION gen directory")
