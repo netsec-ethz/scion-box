@@ -55,6 +55,7 @@ from local_config_util import (
     write_zlog_file,
     TYPES_TO_EXECUTABLES,
     TYPES_TO_KEYS,
+    PROM_PORT_OFFSET,
 )
 
 """
@@ -86,6 +87,8 @@ effects = {
     UPDATE: UPDATED,
     CREATE: CREATED,
 }
+ENDPOINT2SMS_REMAP_IN_PROGRESS_FILE = '.2sms_endpoint_remap_in_progress.tmp'
+
 
 def asid_is_infrastructure(asid):
     return asid > 0xffaa00000000 and asid < 0xffaa00010000
@@ -108,6 +111,8 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
     print("[DEBUG] fullsync received: {}".format(fullsynced))
 
     isdas_list = [asid] # XXX: only one AS supported by query, this could work with multiple ASes
+
+    monitoring_remap_in_progress = os.path.exists(os.path.join(config.gen_path, ENDPOINT2SMS_REMAP_IN_PROGRESS_FILE))
 
     for my_asid, status in fullsynced.items():
         if my_asid not in isdas_list:
@@ -159,6 +164,8 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
         topo_changed_now = tp['BorderRouters'] != new_tp['BorderRouters']
         if topo_changed_now:
             config.write_topology(my_asid, as_obj, new_tp)
+        if topo_changed_now or monitoring_remap_in_progress:
+            _reset_monitoring(new_tp, config)
 
         topo_has_changed = topo_has_changed or topo_changed_now
 
@@ -178,6 +185,33 @@ def fullsync_local_gen(config, coordinator, asid, timestamp):
 
     return topo_has_changed
 
+def _reset_monitoring(tp, config):
+    """
+    Makes a call to the 2SMS endpoint removing all mappings for border routers and setting the new ones instead
+    :param tp:  The new topology
+    :returns: successfully updated 2SMS endpoint
+    """
+    tempfilepath  = os.path.join(config.gen_path, ENDPOINT2SMS_REMAP_IN_PROGRESS_FILE)
+    open(tempfilepath, 'w').close()
+    mappings =[]
+    for br_name, br in tp['BorderRouters'].items():
+        name = br_name.split('-')[-1]
+        name = '/br-{}'.format(name)
+        port = br['InternalAddrs'][0]['Public'][0]['L4Port'] + PROM_PORT_OFFSET
+        mappings.append((name,port))
+    content ={
+        'removeRegex':['/br.*'],
+        'add':[{'Path': m[0],'Port': str(m[1])}
+    for m in mappings]}
+    updated = False
+    try:
+        resp = requests.put("http://localhost:9999/mappings", json=content)
+        updated = resp.ok
+        print("2SMS (monitoring endpoint) responded with {}".format(resp.status_code))
+        os.remove(tempfilepath)
+    except Exception as ex:
+        print('Trying to contact the 2SMS endpoint we got an exception: {}'.format(str(ex)))
+    return updated
 
 def _remove_child_interfaces(topo):
     """
