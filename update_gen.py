@@ -192,7 +192,7 @@ def _reset_monitoring(tp, config):
     for br_name, br in tp['BorderRouters'].items():
         name = br_name.split('-')[-1]
         name = '/br-{}'.format(name)
-        port = br['InternalAddrs'][0]['Public'][0]['L4Port'] + PROM_PORT_OFFSET
+        port = br['InternalAddrs']['IPv4']['PublicOverlay']['OverlayPort'] + PROM_PORT_OFFSET
         mappings.append((name,port))
     content ={
         'removeRegex':['/br.*'],
