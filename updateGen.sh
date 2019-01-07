@@ -18,7 +18,8 @@ IP_ADDR=$(hostname -I | awk '{print $1}')
 URL="https://www.scionlab.org"
 
 # Parse named arguments string into array
-IFS=$'\n' ARGS=($(echo " $*" | awk '{split($0, out, " --"); for(e in out) {print out[e];}}'))
+args_string=$(echo " $*")
+IFS=$'\n' ARGS=($(echo "$args_string" | awk '{split($0, out, " --"); for(e in out) {print out[e];}}'))
 IFS=" "
 for ARG in "${ARGS[@]}"
 do

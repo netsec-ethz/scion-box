@@ -77,7 +77,7 @@ if [ "$no_vpn" -eq 0 ] && { [ -z "$asname" ] || [ -z "$ACC_ID" ] || [ -z "$ACC_P
 fi
 
 declare -a vpn_files=("ca.crt"
-                      "dh4096.pem"
+                      "dh.pem"
                       "$asname.crt"
                       "$asname.key")
 declare -a updater_files=("../update_gen.py"
