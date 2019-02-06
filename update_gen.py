@@ -443,7 +443,7 @@ class LocalConfig:
             instances = tp[type_key].keys()
             for instance_name in instances:
                 config = prep_supervisord_conf(tp[type_key][instance_name], executable_name,
-                                               service_type, instance_name, ia, "127.0.0.1")
+                                               service_type, instance_name, ia)
                 instance_path = get_elem_dir(self.gen_path, ia, instance_name)
                 write_certs_trc_keys(ia, as_obj, instance_path)
                 write_as_conf_and_path_policy(ia, as_obj, instance_path)
