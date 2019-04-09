@@ -516,7 +516,7 @@ class LocalConfig:
         :returns: a process path (e.g., 'gen/ISD1/AS11/br1-11-1')
         """
         for root, _, files in os.walk(path):
-            if 'topology.json' in files:
+            if root != path and 'topology.json' in files:
                 return root
         print("[ERROR] Unable to load topology.json")
         exit(1)
